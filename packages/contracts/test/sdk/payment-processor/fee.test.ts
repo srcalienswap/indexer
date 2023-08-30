@@ -139,11 +139,6 @@ describe("PaymentProcessor - TradingFee", () => {
         constants.AddressZero
     );
 
-    console.log([
-        (100 - tradingFeePercent) * feeBase,
-        tradingFeePercent * feeBase
-    ],)
-
     await zeroSplit.connect(deployer).distributeETH(
         feeAddress,
         [
