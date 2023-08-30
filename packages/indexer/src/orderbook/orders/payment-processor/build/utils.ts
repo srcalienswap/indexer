@@ -6,7 +6,8 @@ import { redb } from "@/common/db";
 import { fromBuffer } from "@/common/utils";
 import { config } from "@/config/index";
 import * as commonHelpers from "@/orderbook/orders/common/helpers";
-import { getRoyalties } from "@/utils/royalties";
+import { Royalty, getRoyalties } from "@/utils/royalties";
+import * as feeSplit from "@/utils/fee-split";
 
 export interface BaseOrderBuildOptions {
   maker: string;
@@ -16,6 +17,9 @@ export interface BaseOrderBuildOptions {
   listingTime?: number;
   expirationTime?: number;
   quantity?: number;
+  fee?: number[];
+  feeRecipient?: string[];
+  apiKey?: string;
 }
 
 type OrderBuildInfo = {
@@ -45,15 +49,35 @@ export const getBuildInfo = async (
     throw new Error("Could not fetch token collection");
   }
 
+  const fees: Royalty[] = [];
+  if (options.fee && options.feeRecipient) {
+    for (let i = 0; i < options.fee.length; i++) {
+      if (Number(options.fee[i]) > 0) {
+        fees.push({
+          recipient: options.feeRecipient[i],
+          bps: options.fee[i],
+        });
+      }
+    }
+  }
+
+  let marketplace = fees.length ? fees[0].recipient : AddressZero;
+  const marketplaceFeeNumerator = fees.length ? String(fees[0].bps) : "0";
+
+  if (fees.length) {
+    const splitFeeAddress = await feeSplit.getSplitsAddress(options.apiKey ?? "unknown", fees);
+    marketplace = splitFeeAddress;
+  }
+
   const contract = fromBuffer(collectionResult.address);
   const buildParams: BaseBuildParams = {
     protocol:
       collectionResult.kind === "erc721"
         ? Sdk.PaymentProcessor.Types.TokenProtocols.ERC721
         : Sdk.PaymentProcessor.Types.TokenProtocols.ERC1155,
-    marketplace: AddressZero,
+    marketplace,
     amount: options.quantity ?? "1",
-    marketplaceFeeNumerator: "0",
+    marketplaceFeeNumerator,
     maxRoyaltyFeeNumerator: await getRoyalties(contract, undefined, "onchain").then((royalties) =>
       royalties.map((r) => r.bps).reduce((a, b) => a + b, 0)
     ),

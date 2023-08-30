@@ -47,6 +47,7 @@ import * as PaymentProcessor from "./payment-processor";
 import * as Seadrop from "./seadrop";
 import * as BlurV2 from "./blur-v2";
 import * as Joepeg from "./joepeg";
+import * as ZeroSplits from "./zero-splits";
 
 // Overrides (shouldn't belong here)
 if (process.env.SEAPORT_V15_OVERRIDE) {
@@ -122,4 +123,5 @@ export {
   Seadrop,
   BlurV2,
   Joepeg,
+  ZeroSplits,
 };

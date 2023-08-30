@@ -1131,6 +1131,10 @@ export const getExecuteBidV5Options: RouteOptions = {
                   });
                 }
 
+                if (params.fees?.length > 1) {
+                  return errors.push({ message: "Only support 1 fee", orderIndex: i });
+                }
+
                 let order: Sdk.PaymentProcessor.Order;
                 if (token) {
                   const [contract, tokenId] = token.split(":");
@@ -1139,12 +1143,14 @@ export const getExecuteBidV5Options: RouteOptions = {
                     maker,
                     contract,
                     tokenId,
+                    apiKey: request.pre?.metrics?.apiKey,
                   });
                 } else if (collection) {
                   order = await paymentProcessorBuyCollection.build({
                     ...params,
                     maker,
                     collection,
+                    apiKey: request.pre?.metrics?.apiKey,
                   });
                 } else {
                   return errors.push({

@@ -934,11 +934,16 @@ export const getExecuteListV5Options: RouteOptions = {
                   return errors.push({ message: "Unsupported orderbook", orderIndex: i });
                 }
 
+                if (params.fees?.length > 1) {
+                  return errors.push({ message: "Only support 1 fee", orderIndex: i });
+                }
+
                 const order = await paymentProcessorSellToken.build({
                   ...params,
                   maker,
                   contract,
                   tokenId,
+                  apiKey: request.pre?.metrics?.apiKey,
                 });
 
                 // Will be set if an approval is needed before listing
