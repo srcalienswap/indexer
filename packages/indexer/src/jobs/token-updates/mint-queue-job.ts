@@ -3,7 +3,7 @@ import { toBuffer } from "@/common/utils";
 import { AbstractRabbitMqJobHandler, BackoffStrategy } from "@/jobs/abstract-rabbit-mq-job-handler";
 import { logger } from "@/common/logger";
 import { recalcTokenCountQueueJob } from "@/jobs/collection-updates/recalc-token-count-queue-job";
-import { redis } from "@/common/redis";
+import { acquireLock, redis } from "@/common/redis";
 import * as tokenSets from "@/orderbook/token-sets";
 import { config } from "@/config/index";
 import { getNetworkSettings } from "@/config/network";
@@ -17,6 +17,7 @@ export type MintQueueJobPayload = {
   contract: string;
   tokenId: string;
   mintedTimestamp: number;
+  context?: string;
 };
 
 export default class MintQueueJob extends AbstractRabbitMqJobHandler {
@@ -31,12 +32,31 @@ export default class MintQueueJob extends AbstractRabbitMqJobHandler {
   public async process(payload: MintQueueJobPayload) {
     const { contract, tokenId, mintedTimestamp } = payload;
 
+    if (config.chainId === 1) {
+      const tokenMetadataIndexingDebug = await redis.sismember(
+        "metadata-indexing-debug-contracts",
+        contract
+      );
+
+      if (tokenMetadataIndexingDebug) {
+        logger.info(
+          this.queueName,
+          JSON.stringify({
+            topic: "tokenMetadataIndexingDebug",
+            message: `Start. contract=${contract}, tokenId=${tokenId}`,
+            payload,
+          })
+        );
+      }
+    }
+
     try {
       // First, check the database for any matching collection
       const collection: {
         id: string;
         token_set_id: string | null;
         community: string | null;
+        token_indexing_method: string | null;
         token_count: number;
       } | null = await idb.oneOrNone(
         `
@@ -44,6 +64,7 @@ export default class MintQueueJob extends AbstractRabbitMqJobHandler {
               collections.id,
               collections.token_set_id,
               collections.community,
+              token_indexing_method,
               token_count
             FROM collections
             WHERE collections.contract = $/contract/
@@ -178,7 +199,9 @@ export default class MintQueueJob extends AbstractRabbitMqJobHandler {
           // Refresh the metadata for the new token
           if (!config.disableRealtimeMetadataRefresh) {
             const delay = getNetworkSettings().metadataMintDelay;
-            const method = metadataIndexFetchJob.getIndexingMethod(collection.community);
+            const method = metadataIndexFetchJob.getIndexingMethod(collection);
+
+            await acquireLock(`refresh-new-token-metadata:${contract}:${tokenId}`, 10);
 
             await metadataIndexFetchJob.addToQueue(
               [
@@ -243,9 +266,7 @@ export default class MintQueueJob extends AbstractRabbitMqJobHandler {
       }
 
       // Set any cached information (eg. floor sell)
-      if (config.chainId !== 999) {
-        await tokenRefreshCacheJob.addToQueue({ contract, tokenId });
-      }
+      await tokenRefreshCacheJob.addToQueue({ contract, tokenId });
     } catch (error) {
       logger.error(
         this.queueName,

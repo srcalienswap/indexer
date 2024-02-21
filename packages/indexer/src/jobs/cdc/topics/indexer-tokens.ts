@@ -15,6 +15,8 @@ import { ActivitiesTokenCache } from "@/models/activities-token-cache";
 import { backfillTokenAsksJob } from "@/jobs/elasticsearch/asks/backfill-token-asks-job";
 import { Collections } from "@/models/collections";
 import { metadataIndexFetchJob } from "@/jobs/metadata-index/metadata-fetch-job";
+import { config } from "@/config/index";
+import { recalcOnSaleCountQueueJob } from "@/jobs/collection-updates/recalc-on-sale-count-queue-job";
 
 export class IndexerTokensHandler extends KafkaEventHandler {
   topicName = "indexer.public.tokens";
@@ -109,35 +111,70 @@ export class IndexerTokensHandler extends KafkaEventHandler {
         }
 
         if (changed.some((value) => ["collection_id"].includes(value))) {
-          await backfillTokenAsksJob.addToQueue(payload.after.contract, payload.after.token_id);
+          await backfillTokenAsksJob.addToQueue(
+            payload.after.contract,
+            payload.after.token_id,
+            true
+          );
         }
+      }
+
+      // If the token was listed or listing was removed update the onSaleCount
+      if (
+        payload.after.collection_id &&
+        changed.some((value) => ["floor_sell_id"].includes(value)) &&
+        (!payload.before.floor_sell_id || !payload.after.floor_sell_id)
+      ) {
+        await recalcOnSaleCountQueueJob.addToQueue({ collection: payload.after.collection_id });
       }
 
       const metadataInitializedAtChanged =
         payload.before.metadata_initialized_at !== payload.after.metadata_initialized_at;
 
       if (metadataInitializedAtChanged && _.random(100) <= 25) {
-        logger.info(
-          "token-metadata-latency-metric",
-          JSON.stringify({
-            topic: "metrics",
-            contract: payload.after.contract,
-            tokenId: payload.after.token_id,
-            indexedLatency: Math.floor(
-              (new Date(payload.after.metadata_indexed_at).getTime() -
-                new Date(payload.after.created_at).getTime()) /
-                1000
-            ),
-            initializedLatency: Math.floor(
-              (new Date(payload.after.metadata_initialized_at).getTime() -
-                new Date(payload.after.created_at).getTime()) /
-                1000
-            ),
-            createdAt: payload.after.created_at,
-            indexedAt: payload.after.metadata_indexed_at,
-            initializedAt: payload.after.metadata_initialized_at,
-          })
+        const indexedLatency = Math.floor(
+          (new Date(payload.after.metadata_indexed_at).getTime() -
+            new Date(payload.after.created_at).getTime()) /
+            1000
         );
+
+        if (indexedLatency >= 500) {
+          logger.warn(
+            "token-metadata-latency-metric",
+            JSON.stringify({
+              topic: "latency-metrics",
+              contract: payload.after.contract,
+              tokenId: payload.after.token_id,
+              indexedLatency,
+              initializedLatency: Math.floor(
+                (new Date(payload.after.metadata_initialized_at).getTime() -
+                  new Date(payload.after.created_at).getTime()) /
+                  1000
+              ),
+              createdAt: payload.after.created_at,
+              indexedAt: payload.after.metadata_indexed_at,
+              initializedAt: payload.after.metadata_initialized_at,
+            })
+          );
+        } else {
+          logger.info(
+            "token-metadata-latency-metric",
+            JSON.stringify({
+              topic: "latency-metrics",
+              contract: payload.after.contract,
+              tokenId: payload.after.token_id,
+              indexedLatency,
+              initializedLatency: Math.floor(
+                (new Date(payload.after.metadata_initialized_at).getTime() -
+                  new Date(payload.after.created_at).getTime()) /
+                  1000
+              ),
+              createdAt: payload.after.created_at,
+              indexedAt: payload.after.metadata_indexed_at,
+              initializedAt: payload.after.metadata_initialized_at,
+            })
+          );
+        }
       }
 
       if (
@@ -145,36 +182,40 @@ export class IndexerTokensHandler extends KafkaEventHandler {
         payload.after.image === null &&
         payload.after.media === null
       ) {
-        redis.sadd("missing-token-image-contracts", payload.after.contract);
+        if (config.chainId === 1) {
+          redis.sadd("metadata-indexing-debug-contracts", payload.after.contract);
+        }
 
         logger.error(
           "IndexerTokensHandler",
           JSON.stringify({
-            message: `token image missing. contract=${payload.after.contract}, tokenId=${payload.after.token_id}`,
+            message: `token image missing. contract=${payload.after.contract}, tokenId=${payload.after.token_id}, fallbackMetadataIndexingMethod=${config.fallbackMetadataIndexingMethod}`,
             payload,
           })
         );
 
-        const collection = await Collections.getByContractAndTokenId(
-          payload.after.contract,
-          payload.after.token_id
-        );
+        if (config.fallbackMetadataIndexingMethod) {
+          const collection = await Collections.getByContractAndTokenId(
+            payload.after.contract,
+            payload.after.token_id
+          );
 
-        await metadataIndexFetchJob.addToQueue(
-          [
-            {
-              kind: "single-token",
-              data: {
-                method: metadataIndexFetchJob.getIndexingMethod(collection?.community),
-                contract: payload.after.contract,
-                tokenId: payload.after.token_id,
-                collection: collection?.id || payload.after.contract,
+          await metadataIndexFetchJob.addToQueue(
+            [
+              {
+                kind: "single-token",
+                data: {
+                  method: config.fallbackMetadataIndexingMethod,
+                  contract: payload.after.contract,
+                  tokenId: payload.after.token_id,
+                  collection: collection?.id || payload.after.contract,
+                },
+                context: "IndexerTokensHandler",
               },
-              context: "IndexerTokensHandler",
-            },
-          ],
-          true
-        );
+            ],
+            true
+          );
+        }
       }
     } catch (error) {
       logger.error(

@@ -317,6 +317,7 @@ export const getCollectionsV7Options: RouteOptions = {
               stage: Joi.string().required(),
               tokenId: Joi.string().pattern(regex.number).allow(null),
               kind: Joi.string().required(),
+              standard: Joi.string(),
               price: JoiPrice.allow(null),
               pricePerQuantity: Joi.array()
                 .items(
@@ -393,6 +394,7 @@ export const getCollectionsV7Options: RouteOptions = {
                   'stage', collection_mints.stage,
                   'tokenId', collection_mints.token_id::TEXT,
                   'kind', collection_mints.kind,
+                  'standard', collection_mint_standards.standard,
                   'currency', concat('0x', encode(collection_mints.currency, 'hex')),
                   'price', collection_mints.price::TEXT,
                   'pricePerQuantity', collection_mints.price_per_quantity,
@@ -403,6 +405,8 @@ export const getCollectionsV7Options: RouteOptions = {
                 )
               ) AS mint_stages
             FROM collection_mints
+            JOIN collection_mint_standards
+              ON collection_mints.collection_id = collection_mint_standards.collection_id
             WHERE collection_mints.collection_id = x.id
               AND collection_mints.status = 'open'
           ) v ON TRUE
@@ -511,13 +515,7 @@ export const getCollectionsV7Options: RouteOptions = {
           collections.top_buy_id,
           collections.top_buy_maker,        
           collections.minted_timestamp,
-          (
-            SELECT
-              COUNT(*)
-            FROM tokens
-            WHERE tokens.collection_id = collections.id
-              AND tokens.floor_sell_value IS NOT NULL
-          ) AS on_sale_count,
+          collections.on_sale_count,
           ARRAY(
             SELECT
               tokens.image
@@ -984,6 +982,7 @@ export const getCollectionsV7Options: RouteOptions = {
                     r.mint_stages.map(async (m: any) => ({
                       stage: m.stage,
                       kind: m.kind,
+                      standard: m.standard,
                       tokenId: m.tokenId,
                       price: m.price
                         ? await getJoiPriceObject({ gross: { amount: m.price } }, m.currency)

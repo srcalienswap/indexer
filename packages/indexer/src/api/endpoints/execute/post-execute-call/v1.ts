@@ -38,6 +38,10 @@ export const postExecuteCallV1Options: RouteOptions = {
       originChainId: Joi.number()
         .required()
         .description("Origination chain id (where solver needs to get paid)"),
+      source: Joi.string()
+        .lowercase()
+        .pattern(regex.domain)
+        .description("Filling source used for attribution. Example: `reservoir.market`"),
     }),
   },
   response: {
@@ -112,10 +116,15 @@ export const postExecuteCallV1Options: RouteOptions = {
           endpoint: "/execute/call/v1",
           salt: Math.floor(Math.random() * 1000000),
         },
+        source: payload.source,
       };
 
       const { requestId, shortRequestId, price, relayerFee, depositGasFee } = await axios
-        .post(`${config.crossChainSolverBaseUrl}/intents/quote`, data)
+        .post(`${config.crossChainSolverBaseUrl}/intents/quote`, data, {
+          headers: {
+            origin: request.headers["origin"],
+          },
+        })
         .then((response) => ({
           requestId: response.data.requestId,
           shortRequestId: response.data.shortRequestId,

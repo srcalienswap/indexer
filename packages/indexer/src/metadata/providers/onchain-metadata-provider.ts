@@ -13,11 +13,15 @@ import {
   normalizeMetadata,
   TokenUriNotFoundError,
   TokenUriRequestTimeoutError,
+  TokenUriRequestForbiddenError,
 } from "./utils";
 import _ from "lodash";
 import { AbstractBaseMetadataProvider } from "./abstract-base-metadata-provider";
 import { getNetworkName } from "@/config/network";
 import axios from "axios";
+import { redis } from "@/common/redis";
+import { idb } from "@/common/db";
+import { toBuffer } from "@/common/utils";
 
 const erc721Interface = new ethers.utils.Interface([
   "function supportsInterface(bytes4 interfaceId) view returns (bool)",
@@ -47,6 +51,25 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
             token.tokenId
           );
 
+          if (config.chainId === 1) {
+            const tokenMetadataIndexingDebug = await redis.sismember(
+              "metadata-indexing-debug-contracts",
+              token.contract
+            );
+
+            if (tokenMetadataIndexingDebug) {
+              logger.info(
+                "_getTokensMetadata",
+                JSON.stringify({
+                  topic: "tokenMetadataIndexingDebug",
+                  message: `getTokenMetadataFromURI. contract=${token.contract}, tokenId=${token.tokenId}, uri=${token.uri}`,
+                  metadata: JSON.stringify(metadata),
+                  error,
+                })
+              );
+            }
+          }
+
           if (!metadata) {
             if (error === 429) {
               throw new RequestWasThrottledError("Request was throttled", 10);
@@ -58,6 +81,10 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
 
             if (error === 404) {
               throw new TokenUriNotFoundError("Not found");
+            }
+
+            if (error === 403) {
+              throw new TokenUriRequestForbiddenError("Not Allowed");
             }
 
             throw new Error(error || "Unknown error");
@@ -199,6 +226,16 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
             }
           } else if (uri.endsWith("/{id}")) {
             uri = uri.replace("{id}", idToToken[token.id].tokenId);
+
+            logger.info(
+              "_getTokensMetadataUri",
+              JSON.stringify({
+                topic: "hexTokenUriDebug",
+                message: `contract=${idToToken[token.id].contract}, tokenId=${
+                  idToToken[token.id].tokenId
+                }, uri=${uri}`,
+              })
+            );
           }
 
           return {
@@ -325,7 +362,11 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
       // Token descriptions are a waste of space for most collections we deal with
       // so by default we ignore them (this behaviour can be overridden if needed).
       description: metadata.description || null,
-      imageUrl: normalizeLink(metadata?.image) || normalizeLink(metadata?.image_url) || null,
+      imageUrl:
+        normalizeLink(metadata?.image) ||
+        normalizeLink(metadata?.image_url) ||
+        normalizeLink(metadata?.image_data) ||
+        null,
       imageOriginalUrl: metadata?.image || metadata?.image_url || null,
       animationOriginalUrl: metadata?.animation_url || null,
       mediaUrl: normalizeLink(metadata?.animation_url) || null,
@@ -356,33 +397,64 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
   // helpers
 
   async detectTokenStandard(contractAddress: string) {
+    let erc721Supported = false;
+    let erc1155Supported = false;
+
     try {
-      const contract = new ethers.Contract(
-        contractAddress,
-        [...erc721Interface.fragments, ...erc1155Interface.fragments],
-        metadataIndexingBaseProvider
-      );
+      let contractKind = await redis.get(`contract-kind:${contractAddress}`);
 
-      const erc721Supported = await contract.supportsInterface("0x80ac58cd");
-      const erc1155Supported = await contract.supportsInterface("0xd9b67a26");
+      if (!contractKind) {
+        const result = await idb.oneOrNone(
+          `
+          SELECT
+            con.kind
+          FROM contracts con
+          WHERE con.address = $/contract/
+        `,
+          {
+            contract: toBuffer(contractAddress),
+          }
+        );
 
-      if (erc721Supported && !erc1155Supported) {
+        contractKind = result?.kind;
+
+        if (contractKind) {
+          await redis.set(`contract-kind:${contractAddress}`, contractKind, "EX", 3600);
+        }
+      }
+
+      erc721Supported = contractKind === "erc721" || contractKind === "erc721-like";
+      erc1155Supported = contractKind === "erc1155";
+
+      if (!erc721Supported && !erc1155Supported) {
+        const contract = new ethers.Contract(
+          contractAddress,
+          [...erc721Interface.fragments, ...erc1155Interface.fragments],
+          metadataIndexingBaseProvider
+        );
+
+        erc721Supported = await contract.supportsInterface("0x80ac58cd");
+
+        if (!erc721Supported) {
+          erc1155Supported = await contract.supportsInterface("0xd9b67a26");
+        }
+      }
+
+      if (erc721Supported) {
         return "ERC721";
-      } else if (!erc721Supported && erc1155Supported) {
+      }
+
+      if (erc1155Supported) {
         return "ERC1155";
-      } else if (erc721Supported && erc1155Supported) {
-        return "Both";
-      } else {
-        return "Unknown";
       }
     } catch (error) {
-      logger.warn(
+      logger.error(
         "onchain-fetcher",
         `detectTokenStandard error. contractAddress:${contractAddress}, error:${error}`
       );
-
-      return "Unknown";
     }
+
+    return "Unknown";
   }
 
   encodeTokenERC721(token: any) {
@@ -583,6 +655,25 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
 
   async getTokenMetadataFromURI(uri: string, contract: string, tokenId: string) {
     try {
+      let tokenMetadataIndexingDebug = 0;
+
+      if (config.chainId === 1) {
+        tokenMetadataIndexingDebug = await redis.sismember(
+          "metadata-indexing-debug-contracts",
+          contract
+        );
+
+        if (tokenMetadataIndexingDebug) {
+          logger.info(
+            "getTokenMetadataFromURI",
+            JSON.stringify({
+              topic: "tokenMetadataIndexingDebug",
+              message: `Start. contract=${contract}, contract=${tokenId}, uri=${uri}`,
+            })
+          );
+        }
+      }
+
       if (uri.startsWith("json:")) {
         uri = uri.replace("json:\n", "");
       }
@@ -613,32 +704,97 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
         })
         .then((res) => {
           if (res.data !== null && typeof res.data === "object") {
+            if (
+              config.chainId === 1 &&
+              contract === "0xd4416b13d2b3a9abae7acd5d6c2bbdbe25686401" &&
+              "message" in res.data
+            ) {
+              logger.info(
+                "getTokenMetadataFromURI",
+                JSON.stringify({
+                  topic: "tokenMetadataIndexingDebug",
+                  message: `ENS Invalid response. contract=${contract}, tokenId=${tokenId}`,
+                  contract,
+                  tokenId,
+                  uri,
+                  resData: res.data,
+                })
+              );
+
+              return [null, 404];
+            }
+
             return [res.data, null];
           }
 
           return [null, "Invalid JSON"];
         })
         .catch((error) => {
-          logger.warn(
-            "onchain-fetcher",
-            JSON.stringify({
-              message: `getTokenMetadataFromURI axios error. contract=${contract}, tokenId=${tokenId}`,
-              contract,
-              tokenId,
-              uri,
-              error,
-              errorResponseStatus: error.response?.status,
-              errorResponseData: error.response?.data,
-            })
-          );
+          const fallbackToIpfsGateway = uri.includes("ipfs.io") && config.ipfsGatewayDomain;
 
-          return [null, error.response?.status || `${error}`];
+          if (fallbackToIpfsGateway) {
+            const ipfsGatewayUrl = uri.replace("ipfs.io", config.ipfsGatewayDomain);
+
+            return axios
+              .get(ipfsGatewayUrl, {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              })
+              .then((res) => {
+                if (res.data !== null && typeof res.data === "object") {
+                  return [res.data, null];
+                }
+
+                return [null, "Invalid JSON"];
+              })
+              .catch((fallbackError) => {
+                logger.warn(
+                  "onchain-fetcher",
+                  JSON.stringify({
+                    topic: tokenMetadataIndexingDebug ? "tokenMetadataIndexingDebug" : undefined,
+                    message: `getTokenMetadataFromURI axios fallback error. contract=${contract}, tokenId=${tokenId}`,
+                    contract,
+                    tokenId,
+                    uri,
+                    error,
+                    errorResponseStatus: error.response?.status,
+                    errorResponseData: error.response?.data,
+                    ipfsGatewayUrl,
+                    fallbackError,
+                    fallbackErrorResponseStatus: fallbackError.response?.status,
+                    fallbackErrorResponseData: fallbackError.response?.data,
+                  })
+                );
+
+                return [
+                  null,
+                  fallbackError.response?.status || fallbackError.code || `${fallbackError}`,
+                ];
+              });
+          } else {
+            logger.warn(
+              "onchain-fetcher",
+              JSON.stringify({
+                topic: tokenMetadataIndexingDebug ? "tokenMetadataIndexingDebug" : undefined,
+                message: `getTokenMetadataFromURI axios error. contract=${contract}, tokenId=${tokenId}`,
+                contract,
+                tokenId,
+                uri,
+                error,
+                errorResponseStatus: error.response?.status,
+                errorResponseData: error.response?.data,
+              })
+            );
+          }
+
+          return [null, error.response?.status || error.code || `${error}`];
         });
     } catch (error) {
       logger.warn(
         "onchain-fetcher",
         JSON.stringify({
-          message: "getTokenMetadataFromURI error",
+          message: `getTokenMetadataFromURI error. contract=${contract}, tokenId=${tokenId}`,
           contract,
           tokenId,
           uri,

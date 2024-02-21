@@ -60,7 +60,9 @@ export const postSimulateOrderV1Options: RouteOptions = {
         Network.EthereumGoerli,
         Network.EthereumSepolia,
         Network.Polygon,
+        Network.Mumbai,
         Network.Arbitrum,
+        Network.ArbitrumNova,
         Network.Optimism,
         Network.Base,
         Network.Zora,
@@ -316,6 +318,21 @@ export const postSimulateOrderV1Options: RouteOptions = {
         });
 
         if (response.statusCode !== 200) {
+          logger.info(
+            "debug",
+            JSON.stringify({
+              payload: {
+                items: [{ orderId: id }],
+                taker,
+                skipBalanceCheck,
+                currency: Sdk.Common.Addresses.Native[config.chainId],
+                allowInactiveOrderIds: true,
+              },
+              response: response.payload,
+              status: response.statusCode,
+            })
+          );
+
           return { message: "Simulation failed" };
         }
 
@@ -326,6 +343,13 @@ export const postSimulateOrderV1Options: RouteOptions = {
         const parsedPayload = JSON.parse(response.payload);
         if (!parsedPayload?.path?.length) {
           return { message: "Nothing to simulate" };
+        }
+
+        const numIncompleteItems = (parsedPayload.steps as { items: { status: string }[] }[])
+          .map((s) => s.items.filter((i) => i.status === "incomplete").length)
+          .reduce((a, b) => a + b, 0);
+        if (numIncompleteItems > 1) {
+          return { message: "Order not simulatable due to multiple required transactions" };
         }
 
         const saleData = parsedPayload.steps.find((s: { id: string }) => s.id === "sale").items[0]
@@ -442,6 +466,13 @@ export const postSimulateOrderV1Options: RouteOptions = {
         const parsedPayload = JSON.parse(response.payload);
         if (!parsedPayload?.path?.length) {
           return { message: "Nothing to simulate" };
+        }
+
+        const numIncompleteItems = (parsedPayload.steps as { items: { status: string }[] }[])
+          .map((s) => s.items.filter((i) => i.status === "incomplete").length)
+          .reduce((a, b) => a + b, 0);
+        if (numIncompleteItems > 1) {
+          return { message: "Order not simulatable due to multiple required transactions" };
         }
 
         const saleData = parsedPayload.steps.find((s: { id: string }) => s.id === "sale").items[0]

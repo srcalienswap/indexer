@@ -72,7 +72,8 @@ export type CustomInfo =
   | (BaseCustomInfo & mints.artblocks.Info)
   | (BaseCustomInfo & mints.highlightxyz.Info)
   | (BaseCustomInfo & mints.zora.Info)
-  | (BaseCustomInfo & mints.bueno.Info);
+  | (BaseCustomInfo & mints.bueno.Info)
+  | (BaseCustomInfo & mints.fairxyz.Info);
 
 export type PartialCollectionMint = Pick<
   CollectionMint,
@@ -139,6 +140,11 @@ export const generateCollectionMintTxData = async (
   let allowlistItemIndex = 0;
 
   const tx = collectionMint.details.tx;
+
+  // Hacky fix for Manifold mints to be routed via the correct method without needing to refresh
+  if (collectionMint.standard === "manifold" && tx.data.signature === "0x26c858a4") {
+    tx.data.signature = "0x07591acc";
+  }
 
   let hasExplicitRecipient = false;
   const encodeParams = async (params: AbiParam[]) => {
