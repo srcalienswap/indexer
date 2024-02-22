@@ -32,6 +32,7 @@ export const ReservoirConduitKey: ChainIdToAddress = {
   [Network.Linea]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
   [Network.Avalanche]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
   [Network.PolygonZkevm]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
+  [Network.Manta]: "0xe8c0b0df50215e70269fb55eabd568088e0ad50c000000000000000000000000",
   [Network.Ancient8Testnet]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
   [Network.Scroll]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
   [Network.FrameTestnet]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
@@ -57,6 +58,7 @@ export const ConduitController: ChainIdToAddress = {
   [Network.Base]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.Linea]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.PolygonZkevm]: "0x00000000f9490004c11cef243f5400493c00ad63",
+  [Network.Manta]: "0xe786999b98504adbda6fa1a787b7a18e2c06b7fe",
   [Network.Zksync]: "0x4c68886e1db29168a6672e614412191591aca502",
   [Network.Ancient8Testnet]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.Scroll]: "0x00000000f9490004c11cef243f5400493c00ad63",
@@ -87,6 +89,7 @@ export const ConduitControllerCodeHash: ChainIdToAddress = {
   [Network.Base]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.Linea]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.PolygonZkevm]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
+  [Network.Manta]: "0xfde822a5f8cca372c4a13e06a9a2baea0f8a45e42347603e34607fab3aacea4c",
   [Network.Ancient8Testnet]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.Scroll]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.ImmutableZkevmTestnet]:

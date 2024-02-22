@@ -46,6 +46,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
     let tokenUrlBase;
     let tokenUrlZksync;
     let tokenUrlPolygonZkevm;
+    let tokenUrlManta;
     let tokenUrlScroll;
     let tokenUrlImmutableZkevmTestnet;
     let tokenUrlAncient8Testnet;
@@ -131,6 +132,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
       tokenUrlBase = this.getTokenUrl(html, url, "base");
       tokenUrlZksync = this.getTokenUrl(html, url, "zksync");
       tokenUrlPolygonZkevm = this.getTokenUrl(html, url, "polygon-zkevm");
+      tokenUrlManta = this.getTokenUrl(html, url, "manta");
       tokenUrlScroll = this.getTokenUrl(html, url, "scroll");
       tokenUrlImmutableZkevmTestnet = this.getTokenUrl(html, url, "immutable-zkevm-testnet");
       tokenUrlAncient8Testnet = this.getTokenUrl(html, url, "ancient8-testnet");
@@ -201,6 +203,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
           tokenUrlBase,
           tokenUrlZksync,
           tokenUrlPolygonZkevm,
+          tokenUrlManta,
           tokenUrlScroll,
           tokenUrlImmutableZkevmTestnet,
           tokenUrlAncient8Testnet,
@@ -235,6 +238,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
       tokenUrlBase,
       tokenUrlZksync,
       tokenUrlPolygonZkevm,
+      tokenUrlManta,
       tokenUrlScroll,
       tokenUrlImmutableZkevmTestnet,
       tokenUrlAncient8Testnet,

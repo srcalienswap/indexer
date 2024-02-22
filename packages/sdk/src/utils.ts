@@ -136,6 +136,7 @@ export enum Network {
   Linea = 59144,
   Zora = 7777777,
   PolygonZkevm = 1101,
+  Manta = 169,
   Scroll = 534352,
   Opbnb = 204,
   Ancient8 = 888888888,

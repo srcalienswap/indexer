@@ -27,6 +27,9 @@ export const getNetworkName = () => {
     case 137:
       return "polygon";
 
+    case 169:
+      return "manta";
+
     case 324:
       return "zksync";
 
@@ -71,6 +74,9 @@ export const getNetworkName = () => {
 
     case 1101:
       return "polygon-zkevm";
+
+    case 3441005:
+      return "manta-testnet";
 
     case 28122024:
       return "ancient8-testnet";
@@ -932,6 +938,40 @@ export const getNetworkSettings = (): NetworkSettings => {
         },
       };
     }
+    // Manta Mainnet
+    case 169: {
+      return {
+        ...defaultNetworkSettings,
+        isTestnet: false,
+        enableWebSocket: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 5,
+        lastBlockLatency: 5,
+        headBlockDelay: 10,
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                INSERT INTO currencies (
+                  contract,
+                  name,
+                  symbol,
+                  decimals,
+                  metadata
+                ) VALUES (
+                  '\\x0000000000000000000000000000000000000000',
+                  'Ether',
+                  'ETH',
+                  18,
+                  '{"coingeckoCurrencyId": "ethereum", "image": "https://assets.coingecko.com/coins/images/279/large/ethereum.png"}'
+                ) ON CONFLICT DO NOTHING
+              `
+            ),
+          ]);
+        },
+      };
+    }
     // ZKsync
     case 324: {
       return {
@@ -1036,6 +1076,40 @@ export const getNetworkSettings = (): NetworkSettings => {
         ...defaultNetworkSettings,
         isTestnet: true,
         enableWebSocket: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 5,
+        lastBlockLatency: 5,
+        headBlockDelay: 10,
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                INSERT INTO currencies (
+                  contract,
+                  name,
+                  symbol,
+                  decimals,
+                  metadata
+                ) VALUES (
+                  '\\x0000000000000000000000000000000000000000',
+                  'Ether',
+                  'ETH',
+                  18,
+                  '{"coingeckoCurrencyId": "ethereum", "image": "https://assets.coingecko.com/coins/images/279/large/ethereum.png"}'
+                ) ON CONFLICT DO NOTHING
+              `
+            ),
+          ]);
+        },
+      };
+    }
+    // manta testnet
+    case 3441005: {
+      return {
+        ...defaultNetworkSettings,
+        isTestnet: true,
+        enableWebSocket: false,
         realtimeSyncMaxBlockLag: 32,
         realtimeSyncFrequencySeconds: 5,
         lastBlockLatency: 5,

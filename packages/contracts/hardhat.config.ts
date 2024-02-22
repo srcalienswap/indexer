@@ -34,6 +34,9 @@ const getNetworkConfig = (chainId?: number) => {
       case 137:
         url = "https://rpc-mainnet.matic.quiknode.pro";
         break;
+      case 169:
+        url = "https://pacific-rpc.manta.network/http";
+        break;
       case 324:
         url = "https://mainnet.era.zksync.io";
         break;
@@ -160,6 +163,7 @@ const config: HardhatUserConfig = {
     optimism: getNetworkConfig(10),
     bsc: getNetworkConfig(56),
     polygon: getNetworkConfig(137),
+    manta: getNetworkConfig(169),
     zkSync: getNetworkConfig(324),
     polygonZkevm: getNetworkConfig(1101),
     base: getNetworkConfig(8453),
@@ -192,6 +196,7 @@ const config: HardhatUserConfig = {
       polygon: process.env.ETHERSCAN_API_KEY_POLYGON ?? "",
       zkSync: "0x",
       polygonZkevm: process.env.ETHERSCAN_API_KEY_POLYGON_ZKEVM ?? "",
+      manta: process.env.ETHERSCAN_API_KEY_MANTA ?? "",
       base: process.env.ETHERSCAN_API_KEY_BASE ?? "",
       arbitrumOne: process.env.ETHERSCAN_API_KEY_ARBITRUM ?? "",
       arbitrumNova: process.env.ETHERSCAN_API_KEY_ARBITRUM_NOVA ?? "",
@@ -215,6 +220,14 @@ const config: HardhatUserConfig = {
     },
     customChains: [
       // Mainnets
+      {
+        network: "manta",
+        chainId: 169,
+        urls: {
+          apiURL: "https://manta-pacific.calderaexplorer.xyz/api",
+          browserURL: "https://pacific-explorer.manta.network",
+        },
+      },
       {
         network: "zkSync",
         chainId: 324,
