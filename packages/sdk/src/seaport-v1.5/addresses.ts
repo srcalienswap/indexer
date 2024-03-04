@@ -26,4 +26,5 @@ export const Exchange: ChainIdToAddress = {
   [Network.Opbnb]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
   [Network.Ancient8]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
   [Network.BaseSepolia]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
+  [Network.Manta]: "0x656851df821b6bbdf570358722a3574113a6237d",
 };
