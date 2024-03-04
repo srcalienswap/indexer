@@ -103,11 +103,7 @@ export class CollectionDocumentBuilder {
         contract: fromBuffer(data.contract),
         contractSymbol: data.contract_symbol,
         name: data.name?.trim(),
-        suggest: this.getSuggest(data),
-        // suggestDay1Rank: this.getSuggest(data, data.day1_rank),
-        // suggestDay7Rank: this.getSuggest(data, data.day7_rank),
-        // suggestDay30Rank: this.getSuggest(data, data.day30_rank),
-        // suggestAllTimeRank: this.getSuggest(data, data.all_time_rank),
+        suggestV2: this.getSuggest(data),
         slug: data.slug,
         image: data.image,
         imageVersion: data.image_version
@@ -213,13 +209,11 @@ export class CollectionDocumentBuilder {
         input: this.generateInputValues(data),
         weight,
         contexts: {
-          chainId: [config.chainId],
-          id: [data.id],
-          community: data.community ? [data.community] : [],
-          hasTokens: [Number(data.token_count) > 0],
-          isSpam: [Number(data.is_spam) > 0],
-          isNsfw: [Number(data.nsfw_status) > 0],
-          metadataDisabled: [Number(data.metadata_disabled) > 0],
+          filters: [
+            `${config.chainId}`,
+            `*|${Number(data.is_spam) > 0}`,
+            `${config.chainId}|${Number(data.is_spam) > 0}`,
+          ],
         },
       });
     }
@@ -229,20 +223,17 @@ export class CollectionDocumentBuilder {
         input: [data.contract_symbol],
         weight,
         contexts: {
-          chainId: [config.chainId],
-          id: [data.id],
-          community: data.community ? [data.community] : [],
-          hasTokens: [Number(data.token_count) > 0],
-          isSpam: [Number(data.is_spam) > 0],
-          isNsfw: [Number(data.nsfw_status) > 0],
-          metadataDisabled: [Number(data.metadata_disabled) > 0],
+          filters: [
+            `${config.chainId}`,
+            `*|${Number(data.is_spam) > 0}`,
+            `${config.chainId}|${Number(data.is_spam) > 0}`,
+          ],
         },
       });
     }
 
     return suggest;
   }
-
   generateInputValues(data: BuildCollectionDocumentData): string[] {
     const words = data.name.trim().split(" ");
     const combinations: string[] = [];

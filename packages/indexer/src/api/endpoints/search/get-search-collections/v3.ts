@@ -16,10 +16,6 @@ import { CollectionSets } from "@/models/collection-sets";
 const version = "v3";
 
 export const getSearchCollectionsV3Options: RouteOptions = {
-  cache: {
-    privacy: "public",
-    expiresIn: 10000,
-  },
   description: "Search Collections",
   tags: ["api", "x-deprecated"],
   plugins: {
@@ -37,7 +33,10 @@ export const getSearchCollectionsV3Options: RouteOptions = {
       displayCurrency: Joi.string()
         .lowercase()
         .pattern(regex.address)
-        .description("Return result in given currency"),
+        .description("Return result in given currency."),
+      excludeSpam: Joi.boolean()
+        .default(false)
+        .description("If true, will filter any collections marked as spam."),
       fuzzy: Joi.boolean()
         .default(false)
         .description("If true, fuzzy search to help with misspellings."),

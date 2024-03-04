@@ -107,6 +107,18 @@ export const generateOpenApiSpec = async () => {
       {
         url: "https://api-frame-testnet.reservoir.tools",
       },
+      {
+        url: "https://api-ancient8-testnet.reservoir.tools",
+      },
+      {
+        url: "https://api-ancient8.reservoir.tools",
+      },
+      {
+        url: "https://api-base-sepolia.reservoir.tools",
+      },
+      {
+        url: "https://api-opbnb.reservoir.tools",
+      },
     ];
 
     // Preset list of tags.

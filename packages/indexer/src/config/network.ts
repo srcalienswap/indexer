@@ -99,6 +99,15 @@ export const getNetworkName = () => {
     case 84532:
       return "base-sepolia";
 
+    case 168587773:
+      return "blast-sepolia";
+
+    case 70700:
+      return "apex";
+
+    case 81457:
+      return "blast";
+
     default:
       return "unknown";
   }
@@ -135,7 +144,7 @@ export const getOpenseaNetworkName = () => {
     case 999:
       return "zora_testnet";
     case 84532:
-      return "base-sepolia";
+      return "base_sepolia";
     default:
       return null;
   }
@@ -277,6 +286,8 @@ export const getNetworkSettings = (): NetworkSettings => {
           "0x0a1bbd57033f57e7b6743621b79fcb9eb2ce3676",
           "0x942bc2d3e7a589fe5bd4a5c6ef9727dfd82f5c8a",
           "0x32d4be5ee74376e08038d652d4dc26e62c67f436",
+          // Blend
+          "0x29469395eaf6f95920e59f858042f0e28d98a20b",
         ],
         washTradingBlacklistedAddresses: [
           "0xac335e6855df862410f96f345f93af4f96351a87",
@@ -330,6 +341,8 @@ export const getNetworkSettings = (): NetworkSettings => {
           ...defaultNetworkSettings.supportedBidCurrencies,
           // Prime
           "0xb23d80f5fefcddaa212212f028021b41ded428cf": true,
+          // USDT
+          "0xdac17f958d2ee523a2206206994597c13d831ec7": true,
         },
         whitelistedCurrencies: new Map([
           [
@@ -1837,6 +1850,107 @@ export const getNetworkSettings = (): NetworkSettings => {
       return {
         ...defaultNetworkSettings,
         isTestnet: true,
+        enableWebSocket: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 5,
+        lastBlockLatency: 5,
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                    INSERT INTO currencies (
+                      contract,
+                      name,
+                      symbol,
+                      decimals,
+                      metadata
+                    ) VALUES (
+                      '\\x0000000000000000000000000000000000000000',
+                      'Ether',
+                      'ETH',
+                      18,
+                      '{"coingeckoCurrencyId": "ethereum", "image": "https://assets.coingecko.com/coins/images/279/large/ethereum.png"}'
+                    ) ON CONFLICT DO NOTHING
+                  `
+            ),
+          ]);
+        },
+      };
+    }
+    // Blast Sepolia
+    case 168587773: {
+      return {
+        ...defaultNetworkSettings,
+        isTestnet: true,
+        enableWebSocket: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 5,
+        lastBlockLatency: 5,
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                    INSERT INTO currencies (
+                      contract,
+                      name,
+                      symbol,
+                      decimals,
+                      metadata
+                    ) VALUES (
+                      '\\x0000000000000000000000000000000000000000',
+                      'Ether',
+                      'ETH',
+                      18,
+                      '{"coingeckoCurrencyId": "ethereum", "image": "https://assets.coingecko.com/coins/images/279/large/ethereum.png"}'
+                    ) ON CONFLICT DO NOTHING
+                  `
+            ),
+          ]);
+        },
+      };
+    }
+    // Apex
+    case 70700: {
+      return {
+        ...defaultNetworkSettings,
+        enableWebSocket: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 5,
+        lastBlockLatency: 5,
+        customTokenAddresses: [
+          "0xaf57145e0c09a75ca4a2dc65ac80c91920e537ce",
+          "0x32a93c3e9a3be8f0fdd0835aba7299cba3624b13",
+        ],
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                    INSERT INTO currencies (
+                      contract,
+                      name,
+                      symbol,
+                      decimals,
+                      metadata
+                    ) VALUES (
+                      '\\x0000000000000000000000000000000000000000',
+                      'Ether',
+                      'ETH',
+                      18,
+                      '{"coingeckoCurrencyId": "ethereum", "image": "https://assets.coingecko.com/coins/images/279/large/ethereum.png"}'
+                    ) ON CONFLICT DO NOTHING
+                  `
+            ),
+          ]);
+        },
+      };
+    }
+    // Blast
+    case 81457: {
+      return {
+        ...defaultNetworkSettings,
         enableWebSocket: true,
         realtimeSyncMaxBlockLag: 32,
         realtimeSyncFrequencySeconds: 5,
