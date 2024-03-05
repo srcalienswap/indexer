@@ -209,6 +209,7 @@ export const AlienswapModule: ChainIdToAddress = {
   [Network.Arbitrum]: "0x670ec3e840816c81fb8567c9a5368ab55f3d796a",
   [Network.Optimism]: "0x670ec3e840816c81fb8567c9a5368ab55f3d796a",
   [Network.Scroll]: "0xf769c98b6e384e98e36d6fc3ec7247dd1e887f57",
+  [Network.Manta]: "0x3953c18bb9bbb8b43f9e4adf6e86b19bd020f4f7",
 };
 
 export const SudoswapModule: ChainIdToAddress = {
