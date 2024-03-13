@@ -158,6 +158,7 @@ export enum Network {
   FrameTestnet = 68840142,
   BaseSepolia = 84532,
   BlastSepolia = 168587773,
+  ZklinkTestnet = 810182,
 }
 
 export type ChainIdToAddress = { [chainId: number]: string };

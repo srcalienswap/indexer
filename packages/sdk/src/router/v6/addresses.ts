@@ -34,6 +34,7 @@ export const Router: ChainIdToAddress = {
   [Network.Apex]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
   [Network.Blast]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
   [Network.AstarZkevm]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
+  [Network.ZklinkTestnet]: "0xd4b15253ad19a9ee0d4280606aa862acc73de7cd",
 };
 
 // Approval proxy
@@ -68,6 +69,7 @@ export const ApprovalProxy: ChainIdToAddress = {
   [Network.Apex]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
   [Network.Blast]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
   [Network.AstarZkevm]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
+  [Network.ZklinkTestnet]: "0x8f92bcbfb436da339660fd78b02289d41191bf11",
 };
 
 // Permit proxy
@@ -212,6 +214,7 @@ export const AlienswapModule: ChainIdToAddress = {
   [Network.Arbitrum]: "0x670ec3e840816c81fb8567c9a5368ab55f3d796a",
   [Network.Optimism]: "0x670ec3e840816c81fb8567c9a5368ab55f3d796a",
   [Network.Scroll]: "0xf769c98b6e384e98e36d6fc3ec7247dd1e887f57",
+  [Network.ZklinkTestnet]: "0x979EE6E20F1F06850349D38BC5210Db2875b9D35",
 };
 
 export const SudoswapModule: ChainIdToAddress = {

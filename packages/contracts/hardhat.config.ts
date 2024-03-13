@@ -110,6 +110,9 @@ const getNetworkConfig = (chainId?: number) => {
       case 168587773:
         url = "https://sepolia.blast.io";
         break;
+      case 810182:
+          url = "https://goerli.rpc.zklink.io";
+          break;
       default:
         throw new Error("Unsupported chain id");
     }
@@ -187,6 +190,7 @@ const config: HardhatUserConfig = {
     apex: getNetworkConfig(70700),
     blast: getNetworkConfig(81457),
     // Testnets
+    zklinkTestnet: getNetworkConfig(810182),
     goerli: getNetworkConfig(5),
     zoraTestnet: getNetworkConfig(999),
     mantleTestnet: getNetworkConfig(5001),
@@ -221,6 +225,7 @@ const config: HardhatUserConfig = {
       apex: "0x",
       blast: process.env.ETHERSCAN_API_KEY_BLAST ?? "",
       // Testnets
+      zklinkTestnet: "0x",
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI ?? "",
       zoraTestnet: "0x",
       mantleTestnet: "0x",
@@ -411,6 +416,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://testnet.blastscan.io/api",
           browserURL: "https://testnet.blastscan.io/",
+        },
+      },
+      {
+        network: "zklinkTestnet",
+        chainId: 810182,
+        urls: {
+          apiURL: "https://goerli.rpc.zklink.io/api",
+          browserURL: "https://goerli.explorer.zklink.io",
         },
       },
     ],

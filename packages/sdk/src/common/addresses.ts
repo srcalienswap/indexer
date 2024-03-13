@@ -35,6 +35,7 @@ export const Native: ChainIdToAddress = {
   [Network.Apex]: AddressZero,
   [Network.Blast]: AddressZero,
   [Network.AstarZkevm]: AddressZero,
+  [Network.ZklinkTestnet]: AddressZero,
 };
 
 // Wrapped native currency
@@ -70,6 +71,7 @@ export const WNative: ChainIdToAddress = {
   [Network.Apex]: "0x77684a04145a5924efce0d92a7c4a2a2e8c359de",
   [Network.Blast]: "0x4300000000000000000000000000000000000004",
   [Network.AstarZkevm]: "0xe9cc37904875b459fa5d0fe37680d36f1ed55e38",
+  [Network.ZklinkTestnet]: "0xCcf32Ff9319BF332e48F4b49957307b953A06da9",
 };
 
 export const Usdc: ChainIdToAddressList = {
