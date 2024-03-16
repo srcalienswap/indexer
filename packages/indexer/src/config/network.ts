@@ -1958,12 +1958,11 @@ export const getNetworkSettings = (): NetworkSettings => {
         realtimeSyncMaxBlockLag: 32,
         realtimeSyncFrequencySeconds: 5,
         lastBlockLatency: 5,
-        headBlockDelay: 10,
         onStartup: async () => {
           // Insert the native currency
           await Promise.all([
             idb.none(
-                `
+              `
                 INSERT INTO currencies (
                   contract,
                   name,

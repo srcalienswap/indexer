@@ -26,7 +26,7 @@ export class Exchange extends SeaportV14Exchange {
   } {
     return {
       name: "Alienswap",
-      version: "1.4",
+      version: "1.5",
       chainId: this.chainId,
       verifyingContract: this.exchangeAddress,
     };
