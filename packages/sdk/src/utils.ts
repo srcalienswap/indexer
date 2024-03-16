@@ -143,6 +143,7 @@ export enum Network {
   Apex = 70700,
   Blast = 81457,
   AstarZkevm = 3776,
+  Zklink = 810180,
   // Testnets
   EthereumGoerli = 5,
   ZoraTestnet = 999,
@@ -158,7 +159,6 @@ export enum Network {
   FrameTestnet = 68840142,
   BaseSepolia = 84532,
   BlastSepolia = 168587773,
-  ZklinkTestnet = 810182,
 }
 
 export type ChainIdToAddress = { [chainId: number]: string };

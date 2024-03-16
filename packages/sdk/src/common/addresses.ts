@@ -23,6 +23,7 @@ export const Native: ChainIdToAddress = {
   [Network.BaseGoerli]: AddressZero,
   [Network.Linea]: AddressZero,
   [Network.Zksync]: AddressZero,
+  [Network.Zklink]: AddressZero,
   [Network.PolygonZkevm]: AddressZero,
   [Network.Ancient8Testnet]: AddressZero,
   [Network.Scroll]: AddressZero,
@@ -35,7 +36,6 @@ export const Native: ChainIdToAddress = {
   [Network.Apex]: AddressZero,
   [Network.Blast]: AddressZero,
   [Network.AstarZkevm]: AddressZero,
-  [Network.ZklinkTestnet]: AddressZero,
 };
 
 // Wrapped native currency
@@ -59,6 +59,7 @@ export const WNative: ChainIdToAddress = {
   [Network.ScrollAlpha]: "0x7160570bb153edd0ea1775ec2b2ac9b65f1ab61b",
   [Network.MantleTestnet]: "0xbaafec4b6ef4f5e0bafa850cbc48364b953efcf9",
   [Network.Zksync]: "0x5aea5775959fbc2557cc8789bc1bf90a239d9a91",
+  [Network.Zklink]: "0x8280a4e7d5b3b658ec4580d3bc30f5e50454f169",
   [Network.PolygonZkevm]: "0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9",
   [Network.Ancient8Testnet]: "0x4200000000000000000000000000000000000006",
   [Network.Scroll]: "0x5300000000000000000000000000000000000004",
@@ -71,7 +72,6 @@ export const WNative: ChainIdToAddress = {
   [Network.Apex]: "0x77684a04145a5924efce0d92a7c4a2a2e8c359de",
   [Network.Blast]: "0x4300000000000000000000000000000000000004",
   [Network.AstarZkevm]: "0xe9cc37904875b459fa5d0fe37680d36f1ed55e38",
-  [Network.ZklinkTestnet]: "0xccf32ff9319bf332e48f4b49957307b953a06da9",
 };
 
 export const Usdc: ChainIdToAddressList = {
