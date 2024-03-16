@@ -649,10 +649,10 @@ export class Sources {
 
         return _.replace(sourceEntity.metadata.url, "${tokenId}", tokenId);
       }
-    } else if (config.chainId == 810182) {
-      if (sourceEntity.metadata.tokenUrlZklinkTestnet && contract && tokenId) {
+    } else if (config.chainId == 810180) {
+      if (sourceEntity.metadata.tokenUrlZklink && contract && tokenId) {
         sourceEntity.metadata.url = _.replace(
-          sourceEntity.metadata.tokenUrlZklinkTestnet,
+          sourceEntity.metadata.tokenUrlZklink,
           "${contract}",
           contract
         );

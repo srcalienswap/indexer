@@ -48,7 +48,7 @@ export type SourcesMetadata = {
   tokenUrlApex?: string;
   tokenUrlBlast?: string;
   tokenUrlAstarZkevm?: string;
-  tokenUrlZklinkTestnet?: string;
+  tokenUrlZklink?: string;
 };
 
 export class SourcesEntity {
