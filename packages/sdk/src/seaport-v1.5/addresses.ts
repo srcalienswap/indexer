@@ -30,5 +30,5 @@ export const Exchange: ChainIdToAddress = {
   [Network.Apex]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
   [Network.Blast]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
   [Network.AstarZkevm]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
-  [Network.Zklink]: "0xeb9c8b66cab4361801b43eeb1a090f0a3ccd1f5d",
+  [Network.Zklink]: "0xe480aefb2594f888d7b343b524542b9a7c06ecd6",
 };
