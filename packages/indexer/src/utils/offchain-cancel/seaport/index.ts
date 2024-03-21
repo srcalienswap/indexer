@@ -8,8 +8,12 @@ import { config } from "@/config/index";
 import { cosigner, saveOffChainCancellations } from "@/utils/offchain-cancel";
 import { Features, FlaggedTokensChecker } from "@/utils/offchain-cancel/seaport/flagged-tokens";
 
-type OrderKind = "seaport-v1.4" | "seaport-v1.5" | "alienswap";
-type Order = Sdk.SeaportV14.Order | Sdk.SeaportV15.Order | Sdk.Alienswap.Order;
+type OrderKind = "seaport-v1.4" | "seaport-v1.5" | "alienswap" | "seaport-v1.6";
+type Order =
+  | Sdk.SeaportV14.Order
+  | Sdk.SeaportV15.Order
+  | Sdk.Alienswap.Order
+  | Sdk.SeaportV16.Order;
 
 type CancelCall = {
   orderKind: OrderKind;
@@ -23,6 +27,13 @@ type ReplacementCall = {
   replacedOrders: OrderComponents[];
 };
 
+function getCancellationZone(kind?: OrderKind) {
+  if (kind === "seaport-v1.6") {
+    return Sdk.SeaportBase.Addresses.ReservoirV16CancellationZone[config.chainId];
+  }
+  return Sdk.SeaportBase.Addresses.ReservoirCancellationZone[config.chainId];
+}
+
 export const createOrder = (
   chainId: number,
   orderData: OrderComponents,
@@ -32,8 +43,10 @@ export const createOrder = (
     return new Sdk.Alienswap.Order(chainId, orderData);
   } else if (orderKind === "seaport-v1.4") {
     return new Sdk.SeaportV14.Order(chainId, orderData);
-  } else {
+  } else if (orderKind === "seaport-v1.5") {
     return new Sdk.SeaportV15.Order(chainId, orderData);
+  } else {
+    return new Sdk.SeaportV16.Order(chainId, orderData);
   }
 };
 
@@ -66,15 +79,19 @@ export const hashOrders = async (orders: OrderComponents[], orderKind: OrderKind
 export const verifyOffChainCancellationSignature = (
   orderIds: string[],
   signature: string,
-  signer: string
+  signer: string,
+  orderKind?: OrderKind
 ) => {
-  const message = generateOffChainCancellationSignatureData(orderIds);
+  const message = generateOffChainCancellationSignatureData(orderIds, orderKind);
   const recoveredSigner = verifyTypedData(message.domain, message.types, message.value, signature);
   return recoveredSigner.toLowerCase() === signer.toLowerCase();
 };
 
-export const generateOffChainCancellationSignatureData = (orderIds: string[]) => {
-  const cancellationZone = Sdk.SeaportBase.Addresses.ReservoirCancellationZone[config.chainId];
+export const generateOffChainCancellationSignatureData = (
+  orderIds: string[],
+  orderKind?: OrderKind
+) => {
+  const cancellationZone = getCancellationZone(orderKind);
   return {
     signatureKind: "eip712",
     domain: {
@@ -92,9 +109,8 @@ export const generateOffChainCancellationSignatureData = (orderIds: string[]) =>
 };
 
 export const doCancel = async (data: CancelCall) => {
-  const cancellationZone = Sdk.SeaportBase.Addresses.ReservoirCancellationZone[config.chainId];
+  const cancellationZone = getCancellationZone(data.orderKind);
   const orders = data.orders;
-
   if (orders.some((order) => order.zone !== cancellationZone)) {
     throw Error("Unauthorized");
   }
@@ -104,7 +120,12 @@ export const doCancel = async (data: CancelCall) => {
     throw Error("Unauthorized");
   }
 
-  const success = verifyOffChainCancellationSignature(orderHashes, data.signature, orderSigner!);
+  const success = verifyOffChainCancellationSignature(
+    orderHashes,
+    data.signature,
+    orderSigner!,
+    data.orderKind
+  );
   if (!success) {
     throw Error("Unauthorized");
   }

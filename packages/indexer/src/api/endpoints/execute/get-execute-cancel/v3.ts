@@ -368,6 +368,25 @@ export const getExecuteCancelV3Options: RouteOptions = {
                 },
               },
             });
+          } else if (kind === "seaport-v1.6") {
+            steps[1].items.push({
+              status: "incomplete",
+              orderIds,
+              data: {
+                sign: offchainCancel.seaport.generateOffChainCancellationSignatureData(
+                  orderIds,
+                  kind
+                ),
+                post: {
+                  endpoint: "/execute/cancel-signature/v1",
+                  method: "POST",
+                  body: {
+                    orderIds: orderIds.sort(),
+                    orderKind: kind,
+                  },
+                },
+              },
+            });
           } else {
             steps[1].items.push({
               status: "incomplete",
