@@ -1,13 +1,14 @@
 import * as Sdk from "@reservoir0x/sdk";
-import { redis } from "@/common/redis";
+import { generateMerkleTree } from "@reservoir0x/sdk/dist/common/helpers";
+
 import { redb } from "@/common/db";
+import { redis } from "@/common/redis";
 import { fromBuffer } from "@/common/utils";
 import { config } from "@/config/index";
-import { BaseOrderBuildOptions, OrderBuildInfo } from "@/orderbook/orders/seaport-base/build/utils";
 import * as OpenSeaApi from "@/jobs/orderbook/post-order-external/api/opensea";
-import { generateSchemaHash } from "@/orderbook/orders/utils";
 import { Tokens } from "@/models/tokens";
-import { generateMerkleTree } from "@reservoir0x/sdk/dist/common/helpers";
+import { BaseOrderBuildOptions, OrderBuildInfo } from "@/orderbook/orders/seaport-base/build/utils";
+import { generateSchemaHash } from "@/orderbook/orders/utils";
 
 export interface BuildOrderOptions extends BaseOrderBuildOptions {
   collection: string;

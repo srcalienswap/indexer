@@ -8,36 +8,41 @@ import { config } from "@/config/index";
 import { cosigner, saveOffChainCancellations } from "@/utils/offchain-cancel";
 import { Features, FlaggedTokensChecker } from "@/utils/offchain-cancel/seaport/flagged-tokens";
 
-type OrderKind = "seaport-v1.4" | "seaport-v1.5" | "alienswap" | "seaport-v1.6";
+export type OffChainCancellableOrderKind =
+  | "seaport-v1.4"
+  | "seaport-v1.5"
+  | "seaport-v1.6"
+  | "alienswap";
+
 type Order =
   | Sdk.SeaportV14.Order
   | Sdk.SeaportV15.Order
-  | Sdk.Alienswap.Order
-  | Sdk.SeaportV16.Order;
+  | Sdk.SeaportV16.Order
+  | Sdk.Alienswap.Order;
 
 type CancelCall = {
-  orderKind: OrderKind;
+  orderKind: OffChainCancellableOrderKind;
   signature: string;
   orders: OrderComponents[];
 };
 
 type ReplacementCall = {
-  orderKind: OrderKind;
+  orderKind: OffChainCancellableOrderKind;
   newOrders: OrderComponents[];
   replacedOrders: OrderComponents[];
 };
 
-function getCancellationZone(kind?: OrderKind) {
+const getCancellationZone = (kind: OffChainCancellableOrderKind) => {
   if (kind === "seaport-v1.6") {
     return Sdk.SeaportBase.Addresses.ReservoirV16CancellationZone[config.chainId];
   }
   return Sdk.SeaportBase.Addresses.ReservoirCancellationZone[config.chainId];
-}
+};
 
 export const createOrder = (
   chainId: number,
   orderData: OrderComponents,
-  orderKind: OrderKind
+  orderKind: OffChainCancellableOrderKind
 ): Order => {
   if (orderKind === "alienswap") {
     return new Sdk.Alienswap.Order(chainId, orderData);
@@ -50,7 +55,10 @@ export const createOrder = (
   }
 };
 
-export const hashOrders = async (orders: OrderComponents[], orderKind: OrderKind) => {
+export const hashOrders = async (
+  orders: OrderComponents[],
+  orderKind: OffChainCancellableOrderKind
+) => {
   let orderSigner: string | undefined;
 
   const orderHashes = [];
@@ -80,7 +88,7 @@ export const verifyOffChainCancellationSignature = (
   orderIds: string[],
   signature: string,
   signer: string,
-  orderKind?: OrderKind
+  orderKind: OffChainCancellableOrderKind
 ) => {
   const message = generateOffChainCancellationSignatureData(orderIds, orderKind);
   const recoveredSigner = verifyTypedData(message.domain, message.types, message.value, signature);
@@ -89,7 +97,7 @@ export const verifyOffChainCancellationSignature = (
 
 export const generateOffChainCancellationSignatureData = (
   orderIds: string[],
-  orderKind?: OrderKind
+  orderKind: OffChainCancellableOrderKind
 ) => {
   const cancellationZone = getCancellationZone(orderKind);
   return {

@@ -167,6 +167,8 @@ export const ReservoirCancellationZone: ChainIdToAddress = {
   [Network.ApexTestnet]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
 };
 
+export const ReservoirV16CancellationZone: ChainIdToAddress = {};
+
 export const OkxCancellationZone: ChainIdToAddress = {
   [Network.Ethereum]: "0x2de95b9afd737b0814e5e6013593a9437c5532d5",
   [Network.Optimism]: "0x2de95b9afd737b0814e5e6013593a9437c5532d5",
@@ -179,30 +181,6 @@ export const OkxCancellationZone: ChainIdToAddress = {
   [Network.Zksync]: "0xea93132c3a66383d89713570fc580dc3fd296083",
   [Network.Linea]: "0x633ac791c6967b89aebf9e385f47ac03182d96c9",
   [Network.PolygonZkevm]: "0x10a8c9065692dffd48df1935e67a2744667fd9d0",
-};
-
-export const ReservoirV16CancellationZone: ChainIdToAddress = {
-  [Network.Ethereum]: "0xaa0e012d35cf7d6ecb6c2bf861e71248501d3226",
-  [Network.EthereumGoerli]: "0x49b91d1d7b9896d28d370b75b92c2c78c1ac984a",
-  [Network.EthereumSepolia]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Optimism]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Bsc]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Polygon]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Mumbai]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.PolygonZkevm]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Base]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Arbitrum]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.ArbitrumNova]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Avalanche]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Linea]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.LineaTestnet]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
-  [Network.Ancient8Testnet]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.Zora]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.Scroll]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.Apex]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.AstarZkevm]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.Blast]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.ApexTestnet]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
 };
 
 export const ImmutableProtectedZone: ChainIdToAddress = {

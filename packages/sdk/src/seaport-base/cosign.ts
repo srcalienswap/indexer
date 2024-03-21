@@ -4,7 +4,6 @@ import { AddressZero } from "@ethersproject/constants";
 import { _TypedDataEncoder } from "@ethersproject/hash";
 import { pack } from "@ethersproject/solidity";
 
-import * as Addresses from "./addresses";
 import { IOrder } from "./order";
 import { MatchParams, ReceivedItem } from "./types";
 import { bn, getCurrentTimestamp } from "../utils";
@@ -123,12 +122,11 @@ export const cosignOrder = async (
   cosigner: TypedDataSigner,
   _taker: string,
   matchParams: MatchParams,
-  _zone?: string
+  zone: string
 ) => {
   const orderHash = order.hash();
   const consideration = computeReceivedItems(order, matchParams);
   const expiration = getCurrentTimestamp(90);
-  const zone = _zone ?? Addresses.ReservoirCancellationZone[order.chainId];
 
   const [extraDataComponent, requiredReceivedItemsHash] = await encodeExtraData(
     order.chainId,
