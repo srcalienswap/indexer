@@ -292,6 +292,7 @@ export const PaymentProcessorModule: ChainIdToAddress = {
 };
 
 export const SeaportV16Module: ChainIdToAddress = {
+  [Network.Ethereum]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
   [Network.EthereumSepolia]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
   [Network.Polygon]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
   [Network.Mumbai]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
