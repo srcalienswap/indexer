@@ -231,7 +231,7 @@ export type BackfillTokenAsksJobPayload = {
   contract: string;
   tokenId: string;
   onlyActive: boolean;
-  forceUpdate: boolean;
+  forceUpdate?: boolean;
   cursor?: {
     createdAt: string;
     id: string;
