@@ -31,11 +31,11 @@ export const SIGNED_ORDER_EIP712_TYPE = {
   ],
 };
 
-export const EIP712_DOMAIN = (chainId: number) => ({
+export const EIP712_DOMAIN = (chainId: number, zone: string) => ({
   name: "SignedZone",
   version: "1.0.0",
   chainId,
-  verifyingContract: Addresses.ReservoirCancellationZone[chainId],
+  verifyingContract: zone,
 });
 
 const encodeContext = (contextVersion: number, contextPayload: BytesLike) =>
@@ -62,9 +62,10 @@ export const signOrder = async (
   fulfiller: string,
   expiration: number,
   orderHash: string,
-  context: BytesLike
+  context: BytesLike,
+  zone: string
 ) =>
-  cosigner._signTypedData(EIP712_DOMAIN(chainId), SIGNED_ORDER_EIP712_TYPE, {
+  cosigner._signTypedData(EIP712_DOMAIN(chainId, zone), SIGNED_ORDER_EIP712_TYPE, {
     fulfiller,
     expiration,
     orderHash,
@@ -94,12 +95,21 @@ const encodeExtraData = async (
   fulfiller: string,
   expiration: number,
   orderHash: string,
-  consideration: ReceivedItem[]
+  consideration: ReceivedItem[],
+  zone: string
 ) => {
   const contextPayload = hashConsideration(consideration);
   const context = encodeContext(SIP6_VERSION, contextPayload);
 
-  const signature = await signOrder(chainId, cosigner, fulfiller, expiration, orderHash, context);
+  const signature = await signOrder(
+    chainId,
+    cosigner,
+    fulfiller,
+    expiration,
+    orderHash,
+    context,
+    zone
+  );
   const extraData = pack(
     ["bytes1", "address", "uint64", "bytes", "bytes"],
     [SIP6_VERSION, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
@@ -112,11 +122,13 @@ export const cosignOrder = async (
   order: IOrder,
   cosigner: TypedDataSigner,
   _taker: string,
-  matchParams: MatchParams
+  matchParams: MatchParams,
+  _zone?: string
 ) => {
   const orderHash = order.hash();
   const consideration = computeReceivedItems(order, matchParams);
   const expiration = getCurrentTimestamp(90);
+  const zone = _zone ?? Addresses.ReservoirCancellationZone[order.chainId];
 
   const [extraDataComponent, requiredReceivedItemsHash] = await encodeExtraData(
     order.chainId,
@@ -124,7 +136,8 @@ export const cosignOrder = async (
     AddressZero,
     expiration,
     orderHash,
-    consideration
+    consideration,
+    zone
   );
 
   return {

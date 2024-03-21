@@ -2,13 +2,13 @@ import { HashZero } from "@ethersproject/constants";
 import { Contract } from "@ethersproject/contracts";
 import { parseEther } from "@ethersproject/units";
 import * as Common from "@reservoir0x/sdk/src/common";
-import * as SeaportV16 from "@reservoir0x/sdk/src/seaport-v1.5";
+import * as SeaportV16 from "@reservoir0x/sdk/src/seaport-v1.6";
 import { Builders } from "@reservoir0x/sdk/src/seaport-base";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { getChainId, getCurrentTimestamp, reset, setupZones, setupNFTs } from "../../utils";
+import { getChainId, getCurrentTimestamp, reset, setupV16Zones, setupNFTs } from "../../utils";
 
 describe("SeaportV16 - SingleToken Erc721 - Cosign", () => {
   const chainId = getChainId();
@@ -25,8 +25,7 @@ describe("SeaportV16 - SingleToken Erc721 - Cosign", () => {
     [deployer, alice, bob] = await ethers.getSigners();
 
     ({ erc721 } = await setupNFTs(deployer));
-
-    ({ zone, signer } = await setupZones(chainId, deployer));
+    ({ zone, signer } = await setupV16Zones(chainId, deployer));
   });
 
   afterEach(reset);
