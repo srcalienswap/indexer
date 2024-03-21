@@ -244,7 +244,7 @@ extend["137,0x2953399124f0cbb46d2cbacd8a89cf0599974963"] = ExtendLogicClasses.op
 extend["1,0xd4ac3ce8e1e14cd60666d49ac34ff2d2937cf6fa"] = courtyard;
 
 // Feralfile
-extend["1,0xc1c2144b3e4e22f4205545e965f52ebc77a1c952"] = ExtendLogicClasses.feralfile;
+extend["1,0x28b51ba8b990c48cb22cb6ef0ad5415fdba5210c"] = ExtendLogicClasses.feralfile;
 
 // CyberKongz
 extend["1,0x57a204aa1042f6e66dd7730813f4024114d74f37"] = cyberkongz;
