@@ -86,6 +86,7 @@ export abstract class KafkaEventHandler {
       "floor_sell_currency_value",
       "normalized_floor_sell_value",
       "normalized_floor_sell_currency_value",
+      "top_buy_value",
     ];
 
     // Handling for fields that should not be converted
