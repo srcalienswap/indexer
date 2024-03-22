@@ -159,7 +159,9 @@ export class IndexerCollectionsHandler extends KafkaEventHandler {
           top_buy_normalized_value: result.top_buy_normalized_value,
           top_buy_currency_value: result.top_buy_currency_value,
           top_buy_currency_normalized_value: result.top_buy_currency_normalized_value,
-          top_buy_value: result.top_buy_value ? bn(result.top_buy_value).toString() : null,
+          top_buy_value: updatedCollection.top_buy_value
+            ? bn(updatedCollection.top_buy_value).toString()
+            : null,
         };
 
         await redis.set(collectionKey, JSON.stringify(updatedPayload), "XX", "KEEPTTL");
