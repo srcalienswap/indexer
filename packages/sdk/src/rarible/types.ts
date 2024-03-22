@@ -147,6 +147,7 @@ export interface IV2OrderData {
   payouts: IPart[];
   originFees: IPart[];
 }
+
 export interface IV2OrderDataV2 {
   "@type"?: string;
   dataType: ORDER_DATA_TYPES;
