@@ -422,17 +422,18 @@ async function formatCollections(
         floorAsk = {
           id: floorAskId,
           sourceDomain: sources.get(floorAskSource)?.domain,
-          price: floorAskId
-            ? await getJoiPriceObject(
-                {
-                  gross: {
-                    amount: floorAskCurrencyValue ?? floorAskValue,
-                    nativeAmount: floorAskValue || 0,
+          price:
+            floorAskId && floorAskValue
+              ? await getJoiPriceObject(
+                  {
+                    gross: {
+                      amount: floorAskCurrencyValue ?? floorAskValue,
+                      nativeAmount: floorAskValue || 0,
+                    },
                   },
-                },
-                floorAskCurrency
-              )
-            : null,
+                  floorAskCurrency
+                )
+              : null,
         };
       }
 
