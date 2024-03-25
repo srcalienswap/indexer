@@ -20,7 +20,6 @@ import {
   getUSDAndNativePrices,
   isWhitelistedCurrency,
 } from "@/utils/prices";
-import { logger } from "@/common/logger";
 
 // --- Prices ---
 
@@ -166,19 +165,6 @@ export const getJoiPriceObject = async (
   ) {
     prices.gross.nativeAmount = "0";
     prices.gross.usdAmount = "0";
-  }
-
-  if (config.chainId === 1 && !prices.gross.amount) {
-    logger.info(
-      "getJoiPriceObject-debug",
-      `currencyAddress=${currencyAddress}, currency=${JSON.stringify(
-        currency
-      )}, prices=${JSON.stringify(
-        prices
-      )}, displayCurrency=${displayCurrency}, totalFeeBps=${totalFeeBps}, currencyChainId=${currencyChainId} stack=${
-        new Error().stack
-      }`
-    );
   }
 
   return {
