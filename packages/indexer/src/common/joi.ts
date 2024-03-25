@@ -79,15 +79,6 @@ export const getJoiAmountObject = async (
   usdAmount?: string,
   totalFeeBps?: number
 ) => {
-  if (config.chainId === 1 && !amount) {
-    logger.info(
-      "getJoiAmountObject-debug",
-      `currency=${JSON.stringify(
-        currency
-      )}, amount=${amount}, nativeAmount=${nativeAmount}, usdAmount=${usdAmount}, totalFeeBps=${totalFeeBps}`
-    );
-  }
-
   let usdPrice = usdAmount;
   if (amount && !usdPrice) {
     usdPrice = (
@@ -180,9 +171,13 @@ export const getJoiPriceObject = async (
   if (config.chainId === 1 && !prices.gross.amount) {
     logger.info(
       "getJoiPriceObject-debug",
-      `currency=${JSON.stringify(currency)}, prices=${JSON.stringify(
+      `currencyAddress=${currencyAddress}, currency=${JSON.stringify(
+        currency
+      )}, prices=${JSON.stringify(
         prices
-      )}, displayCurrency=${displayCurrency}, totalFeeBps=${totalFeeBps}, currencyChainId=${currencyChainId}`
+      )}, displayCurrency=${displayCurrency}, totalFeeBps=${totalFeeBps}, currencyChainId=${currencyChainId} stack=${
+        new Error().stack
+      }`
     );
   }
 
