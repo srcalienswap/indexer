@@ -177,6 +177,15 @@ export const getJoiPriceObject = async (
     prices.gross.usdAmount = "0";
   }
 
+  if (config.chainId === 1 && !prices.gross.amount) {
+    logger.info(
+      "getJoiPriceObject-debug",
+      `currency=${JSON.stringify(currency)}, prices=${JSON.stringify(
+        prices
+      )}, displayCurrency=${displayCurrency}, totalFeeBps=${totalFeeBps}, currencyChainId=${currencyChainId}`
+    );
+  }
+
   return {
     currency: {
       contract: currency.contract,
