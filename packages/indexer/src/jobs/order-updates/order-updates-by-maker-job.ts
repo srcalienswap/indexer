@@ -69,11 +69,13 @@ export type OrderUpdatesByMakerJobPayload = {
       };
 };
 
-function excludeCosignOrder(seaportZone?: string, ppCosigner?: string) {
+// Revalidation of some cosigned orders will be skipped
+const isCosignedOrder = (seaportZone?: string, ppCosigner?: string) => {
   // Payment processor
-  if (ppCosigner && ppCosigner != AddressZero) {
-    return false;
+  if (ppCosigner && ppCosigner !== AddressZero) {
+    return true;
   }
+
   // Seaport
   if (
     seaportZone &&
@@ -82,10 +84,11 @@ function excludeCosignOrder(seaportZone?: string, ppCosigner?: string) {
       Sdk.SeaportBase.Addresses.ReservoirV16CancellationZone[config.chainId],
     ].includes(seaportZone)
   ) {
-    return false;
+    return true;
   }
-  return true;
-}
+
+  return false;
+};
 
 export default class OrderUpdatesByMakerJob extends AbstractRabbitMqJobHandler {
   queueName = "order-updates-by-maker";
@@ -453,10 +456,8 @@ export default class OrderUpdatesByMakerJob extends AbstractRabbitMqJobHandler {
             .filter(({ new_status, kind }) =>
               ["sudoswap", "sudoswap-v2", "nftx"].includes(kind) ? new_status !== "fillable" : true
             )
-            // Exclude cosign orders
-            .filter(({ seaport_zone, pp_cosigner }) =>
-              excludeCosignOrder(seaport_zone, pp_cosigner)
-            )
+            // Exclude cosigned orders
+            .filter(({ seaport_zone, pp_cosigner }) => !isCosignedOrder(seaport_zone, pp_cosigner))
             // Some orders should never get revalidated
             .map((data) =>
               data.new_status === "no-balance" &&
@@ -556,10 +557,8 @@ export default class OrderUpdatesByMakerJob extends AbstractRabbitMqJobHandler {
             // TODO: Is the below filtering needed anymore?
             // Exclude escrowed orders
             .filter(({ kind }) => kind !== "foundation" && kind !== "cryptopunks")
-            // Exclude cosign orders
-            .filter(({ seaport_zone, pp_cosigner }) =>
-              excludeCosignOrder(seaport_zone, pp_cosigner)
-            )
+            // Exclude cosigned orders
+            .filter(({ seaport_zone, pp_cosigner }) => !isCosignedOrder(seaport_zone, pp_cosigner))
             .map(({ id, new_status, expiration }) => ({
               id,
               approval_status: new_status,
