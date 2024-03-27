@@ -1172,6 +1172,7 @@ export const getExecuteListV5Options: RouteOptions = {
                   maker,
                   contract,
                   tokenId,
+                  // apiKey: request.pre?.metrics?.apiKey,
                 });
 
                 // Will be set if an approval is needed before listing
