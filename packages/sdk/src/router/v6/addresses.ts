@@ -32,6 +32,7 @@ export const Router: ChainIdToAddress = {
   [Network.Blast]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
   [Network.AstarZkevm]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
   [Network.ApexTestnet]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
+  [Network.RedstoneTestnet]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
 };
 
 // Approval proxy
@@ -64,6 +65,7 @@ export const ApprovalProxy: ChainIdToAddress = {
   [Network.Blast]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
   [Network.AstarZkevm]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
   [Network.ApexTestnet]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
+  [Network.RedstoneTestnet]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
 };
 
 // Permit proxy
@@ -80,14 +82,17 @@ export const PermitProxy: ChainIdToAddress = {
 // Utility modules
 
 export const SwapModule: ChainIdToAddress = {
-  [Network.Ethereum]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
+  [Network.Ethereum]: "0xc6f6f3743931983739982855267893c63fc94ca3",
   [Network.EthereumGoerli]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
+  [Network.EthereumSepolia]: "0xc6f6f3743931983739982855267893c63fc94ca3",
   [Network.Polygon]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
   [Network.Optimism]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
   [Network.Arbitrum]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
   [Network.Bsc]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
   [Network.Base]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
   [Network.Avalanche]: "0x14ccd0a0f646a35368f7e99f763b2988be0292e5",
+  [Network.Zora]: "0x55a916a916ccddafe90b014e244a85a6b4d5766a",
+  [Network.Blast]: "0x55a916a916ccddafe90b014e244a85a6b4d5766a",
 };
 
 export const OneInchSwapModule: ChainIdToAddress = {
@@ -125,6 +130,7 @@ export const MintModule: ChainIdToAddress = {
   [Network.Blast]: "0xe3de16f7ed5a124686cc27571898e394959e8b39",
   [Network.AstarZkevm]: "0xe3de16f7ed5a124686cc27571898e394959e8b39",
   [Network.ApexTestnet]: "0xe3de16f7ed5a124686cc27571898e394959e8b39",
+  [Network.RedstoneTestnet]: "0xe3de16f7ed5a124686cc27571898e394959e8b39",
 };
 
 export const DittoModule: ChainIdToAddress = {
@@ -169,7 +175,7 @@ export const SeaportV15Module: ChainIdToAddress = {
   [Network.Ethereum]: "0x00ca04c45da318d5b7e7b14d5381ca59f09c73f0",
   [Network.EthereumGoerli]: "0x00ca04c45da318d5b7e7b14d5381ca59f09c73f0",
   [Network.EthereumSepolia]: "0x00ca04c45da318d5b7e7b14d5381ca59f09c73f0",
-  [Network.Polygon]: "0x00ca04c45da318d5b7e7b14d5381ca59f09c73f0",
+  [Network.Polygon]: "0xc41f114b586659045263fb74079a66e79f352f5a",
   [Network.Mumbai]: "0xc41f114b586659045263fb74079a66e79f352f5a",
   [Network.Optimism]: "0x00ca04c45da318d5b7e7b14d5381ca59f09c73f0",
   [Network.Arbitrum]: "0x00ca04c45da318d5b7e7b14d5381ca59f09c73f0",
@@ -192,6 +198,7 @@ export const SeaportV15Module: ChainIdToAddress = {
   [Network.Blast]: "0x16b7f92cdfc9e1aaf30fc7af8914d539b5340a55",
   [Network.AstarZkevm]: "0x16b7f92cdfc9e1aaf30fc7af8914d539b5340a55",
   [Network.ApexTestnet]: "0x16b7f92cdfc9e1aaf30fc7af8914d539b5340a55",
+  [Network.RedstoneTestnet]: "0x16b7f92cdfc9e1aaf30fc7af8914d539b5340a55",
 };
 
 export const AlienswapModule: ChainIdToAddress = {
@@ -270,6 +277,7 @@ export const NFTXV3Module: ChainIdToAddress = {
 export const RaribleModule: ChainIdToAddress = {
   [Network.Ethereum]: "0x0ac4aa4e2b50b9a1638c046f2564a6552427d9e4",
   [Network.EthereumGoerli]: "0x0ac4aa4e2b50b9a1638c046f2564a6552427d9e4",
+  [Network.Polygon]: "0x0ac4aa4e2b50b9a1638c046f2564a6552427d9e4",
 };
 
 export const SuperRareModule: ChainIdToAddress = {
@@ -286,4 +294,19 @@ export const PaymentProcessorModule: ChainIdToAddress = {
   [Network.EthereumSepolia]: "0x273c845e0ad06530dfa408dc2531accd80d170a9",
   [Network.Polygon]: "0x806ccd909e94218a08545eb9ea88a5a0dde6e0c6",
   [Network.Mumbai]: "0x273c845e0ad06530dfa408dc2531accd80d170a9",
+};
+
+export const SeaportV16Module: ChainIdToAddress = {
+  [Network.Ethereum]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.EthereumSepolia]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.Polygon]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.Mumbai]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.Optimism]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.Arbitrum]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.ArbitrumNova]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.Base]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.BaseSepolia]: "0xfdf5cfbcf6503293046ad686bb7fee8e9885b93d",
+  [Network.Avalanche]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.Bsc]: "0xd8f24f5f0382e197c1e87ad82b357209383470cf",
+  [Network.Zora]: "0xfdf5cfbcf6503293046ad686bb7fee8e9885b93d",
 };

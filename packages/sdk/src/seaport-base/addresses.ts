@@ -42,6 +42,7 @@ export const ReservoirConduitKey: ChainIdToAddress = {
   [Network.AstarZkevm]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
   [Network.Blast]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
   [Network.ApexTestnet]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
+  [Network.RedstoneTestnet]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
 };
 
 export const ConduitController: ChainIdToAddress = {
@@ -74,6 +75,7 @@ export const ConduitController: ChainIdToAddress = {
   [Network.Blast]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.AstarZkevm]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.ApexTestnet]: "0x00000000f9490004c11cef243f5400493c00ad63",
+  [Network.RedstoneTestnet]: "0x00000000f9490004c11cef243f5400493c00ad63",
 };
 
 // https://github.com/ProjectOpenSea/seaport/blob/0a8e82ce7262b5ce0e67fa98a2131fd4c47c84e9/contracts/conduit/ConduitController.sol#L493
@@ -107,6 +109,7 @@ export const ConduitControllerCodeHash: ChainIdToAddress = {
   [Network.Blast]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.AstarZkevm]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.ApexTestnet]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
+  [Network.RedstoneTestnet]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
 };
 
 export const OperatorFilterRegistry: ChainIdToAddress = {
@@ -137,6 +140,21 @@ export const OpenSeaProtectedOffersZone: ChainIdToAddress = {
   [Network.Mumbai]: "0x000000e7ec00e7b300774b00001314b8610022b8",
 };
 
+export const OpenSeaV16ProtectedOffersZone: ChainIdToAddress = {
+  [Network.Ethereum]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.EthereumGoerli]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.EthereumSepolia]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Bsc]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Optimism]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Polygon]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Arbitrum]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Avalanche]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Base]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Zora]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.ArbitrumNova]: "0x000056f7000000ece9003ca63978907a00ffd100",
+  [Network.Mumbai]: "0x000056f7000000ece9003ca63978907a00ffd100",
+};
+
 export const FxHashPausableZone: ChainIdToAddress = {
   [Network.Ethereum]: "0x0000000006b429721d1f4c4cd256bf3a38c09ac6",
   [Network.EthereumGoerli]: "0x0000000006b429721d1f4c4cd256bf3a38c09ac6",
@@ -165,6 +183,22 @@ export const ReservoirCancellationZone: ChainIdToAddress = {
   [Network.AstarZkevm]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
   [Network.Blast]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
   [Network.ApexTestnet]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
+  [Network.RedstoneTestnet]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
+};
+
+export const ReservoirV16CancellationZone: ChainIdToAddress = {
+  [Network.Ethereum]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.EthereumSepolia]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.Polygon]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.Mumbai]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.Optimism]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.Arbitrum]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.ArbitrumNova]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.Base]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.BaseSepolia]: "0x088d937f241702de1d8379e7667826a3bbcb6da3",
+  [Network.Avalanche]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.Bsc]: "0x2d1a340cd83434243d090931afabf95b7d3078b0",
+  [Network.Zora]: "0x088d937f241702de1d8379e7667826a3bbcb6da3",
 };
 
 export const OkxCancellationZone: ChainIdToAddress = {

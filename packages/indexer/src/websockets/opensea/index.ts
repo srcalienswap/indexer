@@ -18,7 +18,7 @@ import * as Sdk from "@reservoir0x/sdk";
 import { WebSocket } from "ws";
 import { logger } from "@/common/logger";
 import { doesLockExist, redis, releaseLock } from "@/common/redis";
-import { now } from "@/common/utils";
+import { now, toBuffer } from "@/common/utils";
 import { config } from "@/config/index";
 import { OpenseaOrderParams } from "@/orderbook/orders/seaport-v1.1";
 import { generateHash } from "@/websockets/opensea/utils";
@@ -36,6 +36,7 @@ import { getNetworkSettings, getOpenseaNetworkName } from "@/config/network";
 import _ from "lodash";
 import { Collections } from "@/models/collections";
 import { metadataIndexFetchJob } from "@/jobs/metadata-index/metadata-fetch-job";
+import { ridb } from "@/common/db";
 
 let lastReceivedEventTimestamp: number;
 
@@ -149,6 +150,19 @@ if (config.doWebsocketWork && config.openSeaApiKey) {
 
       const [, contract, tokenId] = event.payload.item.nft_id.split("/");
 
+      // Check: token doesn't exist
+      const tokenExists = await ridb.oneOrNone(
+        `SELECT 1 FROM tokens WHERE tokens.contract = $/contract/ AND tokens.token_id=$/tokenId/`,
+        {
+          contract: toBuffer(contract),
+          tokenId,
+        }
+      );
+
+      if (!tokenExists) {
+        return;
+      }
+
       const lockExists = await doesLockExist(`refresh-new-token-metadata:${contract}:${tokenId}`);
 
       if (!lockExists) {
@@ -244,6 +258,10 @@ type ProtocolData =
   | {
       kind: "seaport-v1.5";
       order: Sdk.SeaportV15.Order;
+    }
+  | {
+      kind: "seaport-v1.6";
+      order: Sdk.SeaportV16.Order;
     };
 
 export const parseProtocolData = (payload: unknown): ProtocolData | undefined => {
@@ -287,6 +305,11 @@ export const parseProtocolData = (payload: unknown): ProtocolData | undefined =>
       return {
         kind: "seaport-v1.5",
         order: new Sdk.SeaportV15.Order(config.chainId, orderComponents),
+      };
+    } else if (protocol === Sdk.SeaportV16.Addresses.Exchange[config.chainId]) {
+      return {
+        kind: "seaport-v1.6",
+        order: new Sdk.SeaportV16.Order(config.chainId, orderComponents),
       };
     }
   } catch (error) {

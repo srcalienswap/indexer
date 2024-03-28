@@ -37,6 +37,10 @@ export type GenericOrderInfo =
       info: orders.seaportV15.OrderInfo;
     } & CommonOrderInfo)
   | ({
+      kind: "seaport-v1.6";
+      info: orders.seaportV16.OrderInfo;
+    } & CommonOrderInfo)
+  | ({
       kind: "cryptopunks";
       info: orders.cryptopunks.OrderInfo;
     } & CommonOrderInfo)
@@ -136,6 +140,11 @@ export const processOrder = async (job: AbstractRabbitMqJobHandler, payload: Gen
 
       case "seaport-v1.5": {
         result = await orders.seaportV15.save([info], validateBidValue, ingestMethod, ingestDelay);
+        break;
+      }
+
+      case "seaport-v1.6": {
+        result = await orders.seaportV16.save([info], validateBidValue, ingestMethod, ingestDelay);
         break;
       }
 
