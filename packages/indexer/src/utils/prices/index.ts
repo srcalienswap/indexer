@@ -295,7 +295,7 @@ export const getUSDAndNativePrices = async (
     isTestnetCurrency(currencyAddress) ||
     isWhitelistedCurrency(currencyAddress) ||
     // Allow price conversion on Zora which is not supported by Coingecko
-    (config.chainId === 7777777 &&
+    (_.includes([7777777, 810180],config.chainId ) &&
       _.includes(
         [Sdk.Common.Addresses.Native[config.chainId], Sdk.Common.Addresses.WNative[config.chainId]],
         currencyAddress
