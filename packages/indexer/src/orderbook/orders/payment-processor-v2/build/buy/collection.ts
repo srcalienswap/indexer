@@ -1,12 +1,11 @@
 import * as Sdk from "@reservoir0x/sdk";
-import { BaseBuilder } from "@reservoir0x/sdk/dist/payment-processor-v2/builders/base";
 
 import { redb } from "@/common/db";
+import { redis } from "@/common/redis";
 import { config } from "@/config/index";
+import { Tokens } from "@/models/tokens";
 import * as utils from "@/orderbook/orders/payment-processor-v2/build/utils";
 import { generateSchemaHash } from "@/orderbook/orders/utils";
-import { redis } from "@/common/redis";
-import { Tokens } from "@/models/tokens";
 
 interface BuildOrderOptions extends utils.BaseOrderBuildOptions {
   collection: string;
@@ -36,12 +35,14 @@ export const build = async (options: BuildOrderOptions) => {
   }
 
   if (collectionIsContractWide) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (buildInfo.params as any).beneficiary = options.maker;
-    const builder: BaseBuilder = new Sdk.PaymentProcessorV2.Builders.ContractWide(config.chainId);
-    return builder.build(buildInfo.params);
+    const builder = new Sdk.PaymentProcessorV2.Builders.ContractWide(config.chainId);
+    return builder.build({
+      ...buildInfo.params,
+      beneficiary: options.maker,
+    });
   } else {
     const builder = new Sdk.PaymentProcessorV2.Builders.TokenList(config.chainId);
+
     // Build the resulting token set's schema
     const schema = {
       kind: "collection",
@@ -67,7 +68,7 @@ export const build = async (options: BuildOrderOptions) => {
       await redis.set(cacheKey, JSON.stringify(cachedTokenIds), "EX", 3600);
     }
 
-    return builder?.build({
+    return builder.build({
       ...buildInfo.params,
       beneficiary: options.maker,
       tokenIds: cachedTokenIds,
