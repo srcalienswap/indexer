@@ -62,6 +62,7 @@ export const build = async (options: BuildOrderOptions) => {
     }
 
     if (!cachedTokenIds) {
+      // Attempt 2: read from database
       cachedTokenIds = await Tokens.getTokenIdsInCollection(options.collection, "", false);
       await redis.set(cacheKey, JSON.stringify(cachedTokenIds), "EX", 3600);
     }
