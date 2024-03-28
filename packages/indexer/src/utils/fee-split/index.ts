@@ -3,7 +3,7 @@ import { Contract } from "@ethersproject/contracts";
 import * as Sdk from "@reservoir0x/sdk";
 import { idb, redb } from "@/common/db";
 import { baseProvider } from "@/common/provider";
-import { fromBuffer, toBuffer } from "@/common/utils";
+import { fromBuffer, toBuffer, bn } from "@/common/utils";
 import { config } from "@/config/index";
 import { Royalty } from "../royalties";
 import { keccak256 } from "@ethersproject/solidity";
@@ -13,20 +13,28 @@ type SplitConfig = {
   distributorFee: number;
 };
 
-export async function getSplitsAddress(apiKey: string, fees: Royalty[], platformFeePercent = 0.3) {
+export async function getSplitsAddress(
+  apiKey: string,
+  originalFee: Royalty,
+  orderBookFee: Royalty,
+  currency: string
+) {
   try {
-    const totalBps = fees.reduce((total, item) => total + item.bps, 0);
-    const feeCutPercent = totalBps * platformFeePercent;
-    const newTotalBps = totalBps - feeCutPercent;
-
-    const newFees = fees.map((c) => {
-      c.bps = Math.floor(((newTotalBps * (c.bps / totalBps)) / totalBps) * 100) * 10000;
-      return c;
+    const totalBps = originalFee.bps + orderBookFee.bps;
+    const newFees: Royalty[] = [];
+    newFees.push({
+      ...orderBookFee,
+      bps: Math.round((orderBookFee.bps / totalBps) * 1e6),
     });
 
     newFees.push({
-      bps: (feeCutPercent / totalBps) * 100 * 10000,
-      recipient: config.tradingFee,
+      ...originalFee,
+      bps: Math.round((originalFee.bps / totalBps) * 1e6),
+    });
+
+    // Sort by account
+    newFees.sort((a, b) => {
+      return bn(a.recipient).gt(bn(b.recipient)) ? 0 : -1;
     });
 
     const distributorFee = 0;
@@ -38,8 +46,14 @@ export async function getSplitsAddress(apiKey: string, fees: Royalty[], platform
     const configHash = getSplitConfigHash(splitConfig);
     const exist = await getSplitConfigFromDB(configHash);
     if (exist) {
-      return exist.address;
+      // tracking currency used
+      const isNewCurrency = !exist.tokens.includes(currency);
+      if (isNewCurrency) {
+        await updateSplitTokens(exist.config, [...exist.tokens, currency]);
+      }
+      return exist;
     }
+
     const zeroSplit = new Contract(
       Sdk.ZeroSplits.Addresses.SplitMain[config.chainId],
       new Interface([
@@ -55,13 +69,15 @@ export async function getSplitsAddress(apiKey: string, fees: Royalty[], platform
         distributorFee
       )
     ).toLowerCase();
-
-    await saveSplitFee(mergedAddress, apiKey, splitConfig);
-    return mergedAddress;
-  } catch {
+    await saveSplitFee(mergedAddress, apiKey, splitConfig, [currency]);
+    return {
+      address: mergedAddress,
+      config: splitConfig,
+      tokens: [currency],
+    };
+  } catch (error) {
     // Skip errors
   }
-
   return undefined;
 }
 
@@ -82,6 +98,7 @@ export const getSplitConfigFromDB = async (hash: string) => {
   return {
     address: fromBuffer(result.address),
     config: result.config as SplitConfig,
+    tokens: result.tokens as string[],
   };
 };
 
@@ -89,7 +106,12 @@ function getSplitConfigHash(config: SplitConfig) {
   return keccak256(["string"], [JSON.stringify(config)]);
 }
 
-export const saveSplitFee = async (splitAddress: string, apiKey: string, config: SplitConfig) => {
+export const saveSplitFee = async (
+  splitAddress: string,
+  apiKey: string,
+  config: SplitConfig,
+  tokens: string[]
+) => {
   const hash = getSplitConfigHash(config);
   await idb.none(
     `
@@ -97,12 +119,14 @@ export const saveSplitFee = async (splitAddress: string, apiKey: string, config:
         hash,
         address,
         api_key,
-        config
+        config,
+        tokens
       ) VALUES (
         $/hash/,
         $/splitAddress/,
         $/apiKey/,
-        $/config:json/
+        $/config:json/,
+        $/tokens:json/
       ) ON CONFLICT DO NOTHING
     `,
     {
@@ -110,6 +134,22 @@ export const saveSplitFee = async (splitAddress: string, apiKey: string, config:
       splitAddress: toBuffer(splitAddress),
       apiKey,
       config,
+      tokens,
+    }
+  );
+};
+
+export const updateSplitTokens = async (config: SplitConfig, tokens: string[]) => {
+  const hash = getSplitConfigHash(config);
+  await idb.none(
+    `
+      UPDATE zerosplits_fees
+        SET tokens = $/tokens:json/
+      WHERE hash = $/hash/
+    `,
+    {
+      hash,
+      tokens,
     }
   );
 };

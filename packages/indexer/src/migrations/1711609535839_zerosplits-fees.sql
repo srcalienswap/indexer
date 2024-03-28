@@ -5,9 +5,10 @@ CREATE TABLE "zerosplits_fees" (
   "address" BYTEA NOT NULL,
   "api_key" TEXT NOT NULL,
   "config" JSONB NOT NULL,
-  "deployed" BOOLEAN NOT NULL,
+  "deployed" BOOLEAN NOT NULL DEFAULT FALSE,
   "deploy_threshold" NUMERIC(78, 0),
   "distribution_threshold" NUMERIC(78, 0),
+  "tokens" JSONB NOT NULL,
   "last_distribution" TIMESTAMPTZ,
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
