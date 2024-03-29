@@ -944,7 +944,7 @@ export const getExecuteSellV7Options: RouteOptions = {
 
           if (feeRecipient.kind !== "marketplace") {
             logger.info(
-              `get-execute-sell-${version}-handler`,
+              "fee-recipients",
               JSON.stringify({
                 message: `feeRecipient already exist with kind royalty`,
                 request: payload,
