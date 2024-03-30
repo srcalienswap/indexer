@@ -1,13 +1,14 @@
 import { Interface } from "@ethersproject/abi";
+import { HashZero } from "@ethersproject/constants";
 import { Contract } from "@ethersproject/contracts";
 import * as Sdk from "@reservoir0x/sdk";
-import { HashZero } from "@ethersproject/constants";
 
 import { logger } from "@/common/logger";
 import { baseProvider } from "@/common/provider";
+import { bn } from "@/common/utils";
 import { config } from "@/config/index";
 import { Transaction } from "@/models/transactions";
-import { getStatus } from "@/orderbook/mints/calldata/helpers";
+import { getStatus, toSafeNumber } from "@/orderbook/mints/calldata/helpers";
 import {
   CollectionMint,
   getCollectionMints,
@@ -35,12 +36,14 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
 
   try {
     const version = await contract.n2mVersion();
-    if (!version) return [];
+    if (!version) {
+      return [];
+    }
 
     const n2mVersion = version.toString();
 
     let price: string;
-    if (parseInt(n2mVersion) > 1999) {
+    if (bn(n2mVersion).gt(1999)) {
       const [mintFee, protocolFee, merkleRoot] = await Promise.all([
         contract.mintFee(1),
         contract.protocolFee(),
@@ -48,13 +51,12 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
       ]);
       price = protocolFee.add(mintFee).toString();
 
-      if (merkleRoot != HashZero) {
-        // allowlist mint
+      if (merkleRoot !== HashZero) {
+        // Skip allowlist mints for now
         return [];
       }
     } else {
       const [totalPrice] = await Promise.all([contract.mintPrice()]);
-
       price = totalPrice.toString();
     }
 
@@ -81,17 +83,13 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
                 kind: "quantity",
                 abiType: "uint256",
               },
-              //   {
-              //     kind: "referrer",
-              //     abiType: "address",
-              //   },
             ],
           },
         },
       },
       currency: Sdk.Common.Addresses.Native[config.chainId],
       price,
-      maxMintsPerWallet: maxPerAddress.toString() === "0" ? undefined : maxPerAddress.toString(),
+      maxMintsPerWallet: toSafeNumber(maxPerAddress),
     });
   } catch (error) {
     logger.error("mint-detector", JSON.stringify({ kind: STANDARD, error }));
@@ -116,17 +114,17 @@ export const extractByTx = async (
 ): Promise<CollectionMint[]> => {
   if (
     [
-      "0x449a52f8", // mintTo
-      "0x438b1b4b", // mintTo
-      "0x4a50aa85", // mintSpecifyTo
-      "0x4402d254", // mintSpecifyTo
-      "0xfefa5d72", // mintRandomTo
-      "0x1d7df191", // mintRandomTo
-      "0x9d13a5ba", // mintPresale
-      "0x6ad54240", // mintCustomURITo
-      "0xa0712d68", // mint
-      "0x94bf804d", // mint
-      "0x1249c58b", // mint
+      "0x449a52f8", // `mintTo`
+      "0x438b1b4b", // `mintTo`
+      "0x4a50aa85", // `mintSpecifyTo`
+      "0x4402d254", // `mintSpecifyTo`
+      "0xfefa5d72", // `mintRandomTo`
+      "0x1d7df191", // `mintRandomTo`
+      "0x9d13a5ba", // `mintPresale`
+      "0x6ad54240", // `mintCustomURITo`
+      "0xa0712d68", // `mint`
+      "0x94bf804d", // `mint`
+      "0x1249c58b", // `mint`
     ].some((bytes4) => tx.data.startsWith(bytes4))
   ) {
     return extractByCollectionERC721(collection);
