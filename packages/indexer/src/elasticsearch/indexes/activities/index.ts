@@ -1569,6 +1569,14 @@ export const updateActivitiesCollection = async (
             keepGoing,
             pendingUpdateDocumentsCount: pendingUpdateDocuments.length,
             queryJson: JSON.stringify(query),
+            bulkParams:
+              contract === "0x2953399124f0cbb46d2cbacd8a89cf0599974963"
+                ? JSON.stringify(bulkParams)
+                : null,
+            response:
+              contract === "0x2953399124f0cbb46d2cbacd8a89cf0599974963"
+                ? JSON.stringify(response)
+                : null,
           })
         );
       }
