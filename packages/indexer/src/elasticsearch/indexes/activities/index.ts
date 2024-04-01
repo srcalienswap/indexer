@@ -1555,6 +1555,8 @@ export const updateActivitiesCollection = async (
       } else {
         keepGoing = pendingUpdateDocuments.length === 1000;
 
+        const hasErrorItems = response?.items?.filter((item) => item.update?.error);
+
         logger.info(
           "elasticsearch-activities",
           JSON.stringify({
@@ -1567,15 +1569,8 @@ export const updateActivitiesCollection = async (
             keepGoing,
             pendingUpdateDocumentsCount: pendingUpdateDocuments.length,
             queryJson: JSON.stringify(query),
-            errorItems: response?.items.filter((item) => item.update?.error),
-            bulkParams:
-              contract === "0x2953399124f0cbb46d2cbacd8a89cf0599974963"
-                ? JSON.stringify(bulkParams)
-                : null,
-            response:
-              contract === "0x2953399124f0cbb46d2cbacd8a89cf0599974963"
-                ? JSON.stringify(response)
-                : null,
+            hasErrorItems: hasErrorItems.length > 0,
+            errorItems: hasErrorItems.length > 0 ? JSON.stringify(hasErrorItems) : undefined,
           })
         );
       }
