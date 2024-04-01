@@ -161,7 +161,7 @@ export class ArchiveBidOrders implements ArchiveInterface {
     } while (deletedOrdersResult.length === limit);
 
     if (deleteActivities) {
-      await deleteArchivedExpiredBidActivitiesJob.addToQueue();
+      await deleteArchivedExpiredBidActivitiesJob.addToQueue(0);
     }
   }
 }
