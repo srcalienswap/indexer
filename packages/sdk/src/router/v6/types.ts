@@ -279,6 +279,8 @@ export type MintDetails = {
   fees: Fee[];
   token: string;
   quantity: number;
+  currency: string;
+  price?: string;
   comment?: string;
 };
 
@@ -287,6 +289,7 @@ export type FillMintsResult = {
     txData: TxData;
     txTags?: TxTags;
     orderIds: string[];
+    approvals: FTApproval[];
   }[];
   success: { [orderId: string]: boolean };
 };

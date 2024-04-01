@@ -2,6 +2,7 @@ import { defaultAbiCoder } from "@ethersproject/abi";
 import { AddressZero } from "@ethersproject/constants";
 import * as Sdk from "@reservoir0x/sdk";
 import { TxData } from "@reservoir0x/sdk/dist/utils";
+import { isNative } from "@reservoir0x/sdk/dist/router/v6/utils";
 import _ from "lodash";
 
 import { idb } from "@/common/db";
@@ -52,6 +53,10 @@ export type AbiParam =
   | {
       kind: "tuple";
       params: AbiParam[];
+    }
+  | {
+      kind: "totalPrice";
+      abiType: string;
     };
 
 export type MintTxSchema = {
@@ -145,6 +150,44 @@ export const generateCollectionMintTxData = async (
   if (collectionMint.standard === "manifold" && tx.data.signature === "0x26c858a4") {
     tx.data.signature = "0x07591acc";
   }
+
+  // Compute the price before encoding
+  let price = collectionMint.price;
+
+  // For DA mints, compute the price just-in-time
+  if (
+    collectionMint.standard === "artblocks" &&
+    (collectionMint.details.info as mints.artblocks.Info).daConfig
+  ) {
+    price = await mints.artblocks.getPrice(
+      (collectionMint.details.info as mints.artblocks.Info).daConfig!
+    );
+  }
+  if (
+    collectionMint.standard === "highlightxyz" &&
+    (collectionMint.details.info as mints.highlightxyz.Info).pricePeriodDuration
+  ) {
+    price = await mints.highlightxyz.getPrice(collectionMint);
+  }
+
+  // If the price is not available on the main `CollectionMint`
+
+  // First, try get it from the allowlist
+  if (!price && allowlistData) {
+    price = allowlistData.actual_price ?? 0;
+  }
+
+  // Then, try to get it from the `pricePerQuantity` data
+  if (!price && collectionMint.pricePerQuantity) {
+    const matchingEntry = collectionMint.pricePerQuantity.find((e) => e.quantity === quantity);
+    if (!matchingEntry) {
+      throw new Error("Requested quantity is not mintable");
+    }
+
+    price = matchingEntry.price;
+  }
+
+  const totalPrice = bn(price!).mul(quantity);
 
   let hasExplicitRecipient = false;
   const encodeParams = async (params: AbiParam[]) => {
@@ -343,6 +386,15 @@ export const generateCollectionMintTxData = async (
           break;
         }
 
+        case "totalPrice": {
+          abiData.push({
+            abiType: p.abiType,
+            abiValue: totalPrice,
+          });
+
+          break;
+        }
+
         default: {
           abiData.push({
             abiType: p.abiType,
@@ -373,47 +425,14 @@ export const generateCollectionMintTxData = async (
           .slice(2)
       : "");
 
-  let price = collectionMint.price;
-
-  // For DA mints, compute the price just-in-time
-  if (
-    collectionMint.standard === "artblocks" &&
-    (collectionMint.details.info as mints.artblocks.Info).daConfig
-  ) {
-    price = await mints.artblocks.getPrice(
-      (collectionMint.details.info as mints.artblocks.Info).daConfig!
-    );
-  }
-  if (
-    collectionMint.standard === "highlightxyz" &&
-    (collectionMint.details.info as mints.highlightxyz.Info).pricePeriodDuration
-  ) {
-    price = await mints.highlightxyz.getPrice(collectionMint);
-  }
-
-  // If the price is not available on the main `CollectionMint`
-
-  // First, try get it from the allowlist
-  if (!price && allowlistData) {
-    price = allowlistData.actual_price ?? 0;
-  }
-
-  // Then, try to get it from the `pricePerQuantity` data
-  if (!price && collectionMint.pricePerQuantity) {
-    const matchingEntry = collectionMint.pricePerQuantity.find((e) => e.quantity === quantity);
-    if (!matchingEntry) {
-      throw new Error("Requested quantity is not mintable");
-    }
-
-    price = matchingEntry.price;
-  }
+  const notNative = !isNative(config.chainId, collectionMint.currency);
 
   return {
     txData: {
       from: minter,
       to: tx.to,
       data,
-      value: bn(price!).mul(quantity).toHexString(),
+      value: !notNative ? bn(price!).mul(quantity).toHexString() : undefined,
     },
     price: price!,
     hasExplicitRecipient,

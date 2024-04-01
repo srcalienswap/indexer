@@ -266,12 +266,15 @@ export class Router {
   ): Promise<FillMintsResult> {
     const txs: FillMintsResult["txs"][0][] = [];
     const success: { [orderId: string]: boolean } = {};
+    const approvals: FTApproval[] = [];
 
     const sender = options?.relayer ?? taker;
+    const hasNoneNativeMint = details.some((c) => !isNative(this.chainId, c.currency));
 
     if (
       !Addresses.MintModule[this.chainId] ||
       options?.forceDirectFilling ||
+      hasNoneNativeMint ||
       // Single mints with no fees, no comment and no `relayer` field (only if the mint doesn't have an explicit recipient)
       (details.length === 1 &&
         !details[0].fees?.length &&
@@ -280,8 +283,18 @@ export class Router {
     ) {
       // Under some conditions, we simply return that transaction data back to the caller
 
-      for (const { txData, orderId } of details) {
+      for (const { txData, orderId, currency, price, quantity } of details) {
+        if (price) {
+          approvals.push({
+            currency: currency,
+            amount: bn(price).mul(quantity),
+            owner: taker,
+            operator: txData.to.toLowerCase(),
+            txData: generateFTApprovalTxData(currency, taker, txData.to.toLowerCase()),
+          });
+        }
         txs.push({
+          approvals,
           txData: {
             ...txData,
             from: sender,
@@ -327,6 +340,7 @@ export class Router {
         .reduce((a, b) => a.add(b), bn(0))
         .toHexString();
       txs.push({
+        approvals: [],
         txData: {
           from: sender,
           to: this.contracts.router.address,

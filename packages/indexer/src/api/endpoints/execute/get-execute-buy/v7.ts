@@ -669,6 +669,8 @@ export const getExecuteBuyV7Options: RouteOptions = {
                 token: collectionMint.contract,
                 quantity: item.quantity,
                 comment: payload.comment,
+                currency: collectionMint.currency,
+                price: collectionMint.price,
               });
 
               await addToPath(
@@ -943,6 +945,8 @@ export const getExecuteBuyV7Options: RouteOptions = {
                         token: mint.contract,
                         quantity: quantityToMint,
                         comment: payload.comment,
+                        currency: mint.currency,
+                        price: mint.price,
                       });
 
                       await addToPath(
@@ -1171,6 +1175,8 @@ export const getExecuteBuyV7Options: RouteOptions = {
                         token: mint.contract,
                         quantity: quantityToMint,
                         comment: payload.comment,
+                        currency: mint.currency,
+                        price: mint.price,
                       });
 
                       await addToPath(
@@ -2270,7 +2276,12 @@ export const getExecuteBuyV7Options: RouteOptions = {
         // - all minted tokens have the taker as the final owner (eg. nothing gets stuck in the router / module)
 
         let safeToUse = true;
-        for (const { txData } of mintsResult.txs) {
+        for (const { txData, approvals } of mintsResult.txs) {
+          // Skip for ERC20 mint
+          if (approvals.length) {
+            continue;
+          }
+
           const events = await getNFTTransferEvents(txData);
           if (!events.length) {
             // At least one successful mint
@@ -2305,10 +2316,10 @@ export const getExecuteBuyV7Options: RouteOptions = {
         }
 
         txs.push(
-          ...mintsResult.txs.map(({ txData, orderIds }) => ({
+          ...mintsResult.txs.map(({ txData, orderIds, approvals }) => ({
             txData,
             orderIds,
-            approvals: [],
+            approvals,
             permits: [],
             preSignatures: [],
           }))

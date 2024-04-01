@@ -524,6 +524,93 @@ export const extractByCollectionERC1155 = async (
             endTime: toSafeTimestamp(saleConfig.presaleEnd),
             allowlistId: merkleRoot,
           });
+        } else if (contractName === "ERC20 Minter") {
+          const erc20Minter = new Contract(
+            minter,
+            new Interface([
+              `function sale(address tokenContract, uint256 tokenId) view returns (
+                (
+                  uint64 saleStart,
+                  uint64 saleEnd,
+                  uint64 maxTokensPerAddress,
+                  uint96 pricePerToken,
+                  address fundsRecipient,
+                  address currency
+                )
+              )`,
+            ]),
+            baseProvider
+          );
+
+          const [saleConfig, tokenInfo] = await Promise.all([
+            erc20Minter.sale(collection, tokenId),
+            c.getTokenInfo(tokenId),
+          ]);
+
+          // No need include mintFee
+          const price = saleConfig.pricePerToken.toString();
+          results.push({
+            collection,
+            contract: collection,
+            stage: "public-sale",
+            kind: "public",
+            status: "open",
+            standard: STANDARD,
+            details: {
+              tx: {
+                to: minter,
+                data: {
+                  // `mint`
+                  signature: "0xf54f216a",
+                  params: [
+                    {
+                      kind: "recipient",
+                      abiType: "address",
+                    },
+                    {
+                      kind: "quantity",
+                      abiType: "uint256",
+                    },
+                    {
+                      kind: "unknown",
+                      abiType: "address",
+                      abiValue: collection,
+                    },
+                    {
+                      kind: "unknown",
+                      abiType: "uint256",
+                      abiValue: tokenId,
+                    },
+                    {
+                      kind: "totalPrice",
+                      abiType: "uint256",
+                    },
+                    {
+                      kind: "unknown",
+                      abiType: "address",
+                      abiValue: saleConfig.currency,
+                    },
+                    {
+                      kind: "referrer",
+                      abiType: "address",
+                    },
+                    {
+                      kind: "comment",
+                      abiType: "string",
+                    },
+                  ],
+                },
+              },
+              info: minter ? { minter } : undefined,
+            },
+            tokenId,
+            currency: saleConfig.currency,
+            price,
+            maxMintsPerWallet: toSafeNumber(saleConfig.maxTokensPerAddress),
+            maxSupply: toSafeNumber(tokenInfo.maxSupply),
+            startTime: toSafeTimestamp(saleConfig.saleStart),
+            endTime: toSafeTimestamp(saleConfig.saleEnd),
+          });
         }
 
         break;
@@ -589,6 +676,7 @@ export const extractByTx = async (
         "0x9dbb844d", // `mintWithRewards`
         "0xc9a05470", // `premint`
         "0xd904b94a", // `callSale`
+        "0xf54f216a", // `ERC20Minter.mint`
       ].some((bytes4) => tx.data.startsWith(bytes4))
     ) {
       const iface = new Interface([
@@ -596,13 +684,19 @@ export const extractByTx = async (
         "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes minterArguments, address mintReferral)",
         "function premint((address, string, string) contractConfig, ((string, uint256, uint64, uint96, uint64, uint64, uint32, uint32, address, address), uint32 tokenId, uint32, bool) premintConfig, bytes signature, uint256 quantityToMint, string mintComment)",
         "function callSale(uint256 tokenId, address salesConfig, bytes data)",
+        "function mint(address mintTo,uint256 quantity,address tokenAddress,uint256 tokenId,uint256 totalValue,address currency,address mintReferral,string comment)",
       ]);
 
       let tokenId: string;
       let minter: string | undefined;
       switch (tx.data.slice(0, 10)) {
         case "0x731133e9":
-          tokenId = iface.decodeFunctionData("mint", tx.data).tokenId.toString();
+          tokenId = iface
+            .decodeFunctionData(
+              "mint(address minter, uint256 tokenId, uint256 quantity, bytes data)",
+              tx.data
+            )
+            .tokenId.toString();
           break;
 
         case "0x9dbb844d": {
@@ -614,6 +708,17 @@ export const extractByTx = async (
 
         case "0xd904b94a": {
           tokenId = iface.decodeFunctionData("callSale", tx.data).tokenId.toString();
+          break;
+        }
+
+        case "0xf54f216a": {
+          minter = tx.to;
+          tokenId = iface
+            .decodeFunctionData(
+              "mint(address mintTo,uint256 quantity,address tokenAddress,uint256 tokenId,uint256 totalValue,address currency,address mintReferral,string comment)",
+              tx.data
+            )
+            .tokenId.toString();
           break;
         }
 

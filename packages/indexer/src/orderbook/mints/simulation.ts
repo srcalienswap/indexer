@@ -1,6 +1,7 @@
 import { getCallResult, getCallTraceLogs } from "@georgeroman/evm-tx-simulator";
 import { Log } from "@georgeroman/evm-tx-simulator/dist/types";
 import { Network, TxData } from "@reservoir0x/sdk/dist/utils";
+import { isNative } from "@reservoir0x/sdk/dist/router/v6/utils";
 
 import { idb } from "@/common/db";
 import { baseProvider } from "@/common/provider";
@@ -56,6 +57,11 @@ export const simulateCollectionMint = async (
   );
   if (!collectionResult) {
     return false;
+  }
+
+  // Skip for ERC20 currency now
+  if (!isNative(config.chainId, collectionMint.currency)) {
+    return true;
   }
 
   const minter = "0x0000000000000000000000000000000000000001";
