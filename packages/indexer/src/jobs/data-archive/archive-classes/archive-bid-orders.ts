@@ -144,9 +144,9 @@ export class ArchiveBidOrders implements ArchiveInterface {
 
       logger.info(
         "archive-bid-orders",
-        `Bids deleted. ${startTime} - ${endTime} deletedOrdersCount=${JSON.stringify(
-          deletedOrdersResult?.length
-        )}`
+        `Bids deleted. ${startTime} - ${endTime}. deleteExpiredBidsElasticsearch=${
+          config.deleteExpiredBidsElasticsearch
+        }, deletedOrdersCount=${JSON.stringify(deletedOrdersResult?.length)}`
       );
 
       if (deletedOrdersResult.length && config.deleteExpiredBidsElasticsearch) {
