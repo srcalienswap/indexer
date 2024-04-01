@@ -1569,8 +1569,8 @@ export const updateActivitiesCollection = async (
             keepGoing,
             pendingUpdateDocumentsCount: pendingUpdateDocuments.length,
             queryJson: JSON.stringify(query),
-            hasErrorItems: hasErrorItems.length > 0,
-            errorItems: hasErrorItems.length > 0 ? JSON.stringify(hasErrorItems) : undefined,
+            hasErrorItems: hasErrorItems?.length > 0,
+            errorItems: hasErrorItems?.length > 0 ? JSON.stringify(hasErrorItems) : undefined,
           })
         );
       }
