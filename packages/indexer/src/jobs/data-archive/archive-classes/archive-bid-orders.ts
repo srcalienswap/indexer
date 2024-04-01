@@ -122,7 +122,7 @@ export class ArchiveBidOrders implements ArchiveInterface {
   }
 
   async deleteFromTable(startTime: string, endTime: string) {
-    const limit = 5000;
+    const limit = 1000;
     let deletedOrdersResult;
     let deleteActivities = false;
 
