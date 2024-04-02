@@ -38,7 +38,7 @@ export default class CollectionRefreshCacheJob extends AbstractRabbitMqJobHandle
       await Collections.recalculateContractFloorSell(fromBuffer(result[0].contract));
       for (const { contract, token_id } of result) {
         await resyncAttributeCacheJob.addToQueue(
-          { contract: fromBuffer(contract), tokenId: token_id },
+          { contract: fromBuffer(contract), tokenId: token_id, context: this.queueName },
           0
         );
       }

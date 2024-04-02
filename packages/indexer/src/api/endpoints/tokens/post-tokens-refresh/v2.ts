@@ -207,7 +207,11 @@ export const postTokensRefreshV2Options: RouteOptions = {
         );
 
         // Revalidate the token attribute cache
-        await resyncAttributeCacheJob.addToQueue({ contract, tokenId }, 0, overrideCoolDown);
+        await resyncAttributeCacheJob.addToQueue(
+          { contract, tokenId, context: "post-tokens-refresh-v2" },
+          0,
+          overrideCoolDown
+        );
 
         logger.info(
           `post-tokens-refresh-${version}-handler`,

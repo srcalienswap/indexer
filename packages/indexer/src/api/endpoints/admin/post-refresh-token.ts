@@ -95,7 +95,10 @@ export const postRefreshTokenOptions: RouteOptions = {
       await orderFixesJob.addToQueue([{ by: "token", data: { token: payload.token } }]);
 
       // Revalidate the token attribute cache
-      await resyncAttributeCacheJob.addToQueue({ contract, tokenId }, 0);
+      await resyncAttributeCacheJob.addToQueue(
+        { contract, tokenId, context: "post-refresh-token" },
+        0
+      );
 
       // Refresh the token floor sell and top bid
       await tokenRefreshCacheJob.addToQueue({ contract, tokenId, checkTopBid: true });

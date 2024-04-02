@@ -8,6 +8,7 @@ import { logger } from "@/common/logger";
 export type ResyncAttributeCacheJobPayload = {
   contract: string;
   tokenId: string;
+  context?: string;
 };
 
 export default class ResyncAttributeCacheJob extends AbstractRabbitMqJobHandler {

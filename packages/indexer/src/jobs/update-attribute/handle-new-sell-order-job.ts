@@ -35,6 +35,7 @@ export default class HandleNewSellOrderJob extends AbstractRabbitMqJobHandler {
       await resyncAttributeCacheJob.addToQueue({
         contract,
         tokenId,
+        context: this.queueName,
       });
     }
 
@@ -44,6 +45,7 @@ export default class HandleNewSellOrderJob extends AbstractRabbitMqJobHandler {
       await resyncAttributeCacheJob.addToQueue({
         contract,
         tokenId,
+        context: this.queueName,
       });
     }
 

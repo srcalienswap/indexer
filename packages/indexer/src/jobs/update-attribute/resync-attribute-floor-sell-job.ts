@@ -52,7 +52,11 @@ export default class ResyncAttributeFloorSellJob extends AbstractRabbitMqJobHand
 
       _.forEach(tokens, (token) => {
         resyncAttributeCacheJob.addToQueue(
-          { contract: fromBuffer(token.contract), tokenId: token.token_id },
+          {
+            contract: fromBuffer(token.contract),
+            tokenId: token.token_id,
+            context: this.queueName,
+          },
           0
         );
       });
