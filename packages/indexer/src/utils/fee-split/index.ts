@@ -17,7 +17,7 @@ export async function getSplitsAddress(
   apiKey: string,
   originalFee: Royalty,
   orderBookFee: Royalty,
-  currency: string
+  currency?: string
 ) {
   try {
     const totalBps = originalFee.bps + orderBookFee.bps;
@@ -45,7 +45,7 @@ export async function getSplitsAddress(
 
     const configHash = getSplitConfigHash(splitConfig);
     const exist = await getSplitConfigFromDB(configHash);
-    if (exist) {
+    if (exist && currency) {
       // tracking currency used
       const isNewCurrency = !exist.tokens.includes(currency);
       if (isNewCurrency) {
@@ -69,7 +69,7 @@ export async function getSplitsAddress(
         distributorFee
       )
     ).toLowerCase();
-    await saveSplitFee(mergedAddress, apiKey, splitConfig, [currency]);
+    await saveSplitFee(mergedAddress, apiKey, splitConfig, currency ? [currency] : []);
     return {
       address: mergedAddress,
       config: splitConfig,
