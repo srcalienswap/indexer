@@ -1,8 +1,8 @@
 import { AbstractRabbitMqJobHandler } from "@/jobs/abstract-rabbit-mq-job-handler";
-import { Attributes } from "@/models/attributes";
 import { Tokens } from "@/models/tokens";
 import { config } from "@/config/index";
-import _ from "lodash";
+
+import { resyncAttributeCacheJob } from "@/jobs/update-attribute/resync-attribute-cache-job";
 import { logger } from "@/common/logger";
 
 export type ResyncTokenAttributesCacheJobPayload = {
@@ -27,49 +27,31 @@ export default class ResyncTokenAttributesCacheJob extends AbstractRabbitMqJobHa
       ResyncTokenAttributesCacheJob.maxTokensPerAttribute
     );
 
-    // Recalculate the number of tokens on sale for each attribute
-    for (const tokenAttribute of tokenAttributes) {
-      const startTimestamp = new Date().getTime();
-
-      const { floorSell, onSaleCount } = await Tokens.getSellFloorValueAndOnSaleCount(
-        tokenAttribute.collectionId,
-        tokenAttribute.key,
-        tokenAttribute.value
-      );
-
-      await Attributes.update(tokenAttribute.attributeId, {
-        floorSellId: floorSell?.id,
-        floorSellValue: floorSell?.value,
-        floorSellCurrency: floorSell?.currency,
-        floorSellCurrencyValue: floorSell?.currencyValue,
-        floorSellMaker: floorSell?.maker,
-        floorSellValidFrom: floorSell?.validFrom,
-        floorSellValidTo: floorSell?.validTo,
-        floorSellSourceIdInt: floorSell?.sourceIdInt,
-        onSaleCount,
-        sellUpdatedAt: new Date().toISOString(),
-      });
-
-      if (config.chainId === 1) {
+    if (config.chainId === 1) {
+      for (const tokenAttribute of tokenAttributes) {
         logger.info(
           this.queueName,
           JSON.stringify({
             topic: "debugCPU",
-            message: `Start. contract=${contract}, tokenId=${tokenId}, attributeId=${tokenAttribute.attributeId}`,
+            message: `Processing Token Attribute. attributeId=${tokenAttribute.attributeId}`,
             payload,
-            tokenAttribute,
-            token: `${contract}:${tokenId}`,
-            tokenAndAttribute: `${contract}:${tokenId}:${tokenAttribute.attributeId}`,
-            latencyMs: new Date().getTime() - startTimestamp,
+            attributeId: tokenAttribute.attributeId,
           })
         );
       }
     }
+
+    // Recalculate the number of tokens on sale for each attribute
+    await resyncAttributeCacheJob.addToQueue(
+      tokenAttributes.map((tokenAttribute) => ({
+        attributeId: tokenAttribute.attributeId,
+      }))
+    );
   }
 
   public async addToQueue(
     params: ResyncTokenAttributesCacheJobPayload,
-    delay = _.includes([1, 137], config.chainId) ? 60 * 10 * 1000 : 60 * 60 * 24 * 1000,
+    delay = 60 * 1000,
     forceRefresh = false
   ) {
     const token = `${params.contract}:${params.tokenId}`;
