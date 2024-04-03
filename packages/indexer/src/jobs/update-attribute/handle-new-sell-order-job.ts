@@ -2,7 +2,7 @@ import { AbstractRabbitMqJobHandler } from "@/jobs/abstract-rabbit-mq-job-handle
 import { Attributes } from "@/models/attributes";
 import { Tokens } from "@/models/tokens";
 import _ from "lodash";
-import { resyncAttributeCacheJob } from "@/jobs/update-attribute/resync-attribute-cache-job";
+import { resyncTokenAttributesCacheJob } from "@/jobs/update-attribute/resync-token-attributes-cache-job";
 
 export type HandleNewSellOrderJobPayload = {
   contract: string;
@@ -32,20 +32,18 @@ export default class HandleNewSellOrderJob extends AbstractRabbitMqJobHandler {
     // If this is a new sale
     if (_.isNull(previousPrice) && !_.isNull(price)) {
       await Attributes.incrementOnSaleCount(tokenAttributesIds, 1);
-      await resyncAttributeCacheJob.addToQueue({
+      await resyncTokenAttributesCacheJob.addToQueue({
         contract,
         tokenId,
-        context: this.queueName,
       });
     }
 
     // The sale ended
     if (!_.isNull(previousPrice) && _.isNull(price)) {
       await Attributes.incrementOnSaleCount(tokenAttributesIds, -1);
-      await resyncAttributeCacheJob.addToQueue({
+      await resyncTokenAttributesCacheJob.addToQueue({
         contract,
         tokenId,
-        context: this.queueName,
       });
     }
 

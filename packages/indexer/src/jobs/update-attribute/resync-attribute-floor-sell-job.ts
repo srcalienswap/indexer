@@ -1,7 +1,7 @@
 import { AbstractRabbitMqJobHandler } from "@/jobs/abstract-rabbit-mq-job-handler";
 import { redb } from "@/common/db";
 import _ from "lodash";
-import { resyncAttributeCacheJob } from "@/jobs/update-attribute/resync-attribute-cache-job";
+import { resyncTokenAttributesCacheJob } from "@/jobs/update-attribute/resync-token-attributes-cache-job";
 import { fromBuffer } from "@/common/utils";
 
 export type ResyncAttributeFloorSellJobPayload = {
@@ -51,12 +51,8 @@ export default class ResyncAttributeFloorSellJob extends AbstractRabbitMqJobHand
       const tokens = await redb.manyOrNone(tokensQuery, { collectionsIds });
 
       _.forEach(tokens, (token) => {
-        resyncAttributeCacheJob.addToQueue(
-          {
-            contract: fromBuffer(token.contract),
-            tokenId: token.token_id,
-            context: this.queueName,
-          },
+        resyncTokenAttributesCacheJob.addToQueue(
+          { contract: fromBuffer(token.contract), tokenId: token.token_id },
           0
         );
       });
