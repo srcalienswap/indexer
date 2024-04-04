@@ -471,14 +471,11 @@ export const getExecuteListV5Options: RouteOptions = {
       await Promise.all(
         params.map(async (params, i) => {
           const [contract, tokenId] = params.token.split(":");
-
           // Force usage of seaport-v1.5
-          if (params.orderKind === "seaport") {
-            params.orderKind = "seaport-v1.5";
+          if (["seaport", "seaport-v1.4", "seaport-v1.5"].includes(params.orderKind)) {
+            params.orderKind = "seaport-v1.6";
           }
-          if (params.orderKind === "seaport-v1.4") {
-            params.orderKind = "seaport-v1.5";
-          }
+
           // Force usage of looks-rare-v2
           if (params.orderKind === "looks-rare") {
             params.orderKind = "looks-rare-v2";
