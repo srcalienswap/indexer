@@ -638,8 +638,15 @@ export const getExecuteBidV5Options: RouteOptions = {
           const attributeKey = params.attributeKey;
           const attributeValue = params.attributeValue;
 
-          // Force usage of seaport-v1.6
-          if (["seaport", "seaport-v1.4", "seaport-v1.5"].includes(params.orderKind)) {
+          // Force usage of seaport-v1.5
+          if (params.orderKind === "seaport") {
+            params.orderKind = "seaport-v1.5";
+          }
+          if (params.orderKind === "seaport-v1.4") {
+            params.orderKind = "seaport-v1.5";
+          }
+
+          if (params.orderbook === "opensea" && params.orderKind === "seaport-v1.5") {
             params.orderKind = "seaport-v1.6";
           }
 

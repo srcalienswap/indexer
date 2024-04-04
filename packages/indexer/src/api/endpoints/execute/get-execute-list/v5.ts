@@ -471,8 +471,16 @@ export const getExecuteListV5Options: RouteOptions = {
       await Promise.all(
         params.map(async (params, i) => {
           const [contract, tokenId] = params.token.split(":");
+
           // Force usage of seaport-v1.5
-          if (["seaport", "seaport-v1.4", "seaport-v1.5"].includes(params.orderKind)) {
+          if (params.orderKind === "seaport") {
+            params.orderKind = "seaport-v1.5";
+          }
+          if (params.orderKind === "seaport-v1.4") {
+            params.orderKind = "seaport-v1.5";
+          }
+
+          if (params.orderbook === "opensea" && params.orderKind === "seaport-v1.5") {
             params.orderKind = "seaport-v1.6";
           }
 
