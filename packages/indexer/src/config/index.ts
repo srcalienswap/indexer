@@ -175,6 +175,7 @@ export const config = {
   elasticsearchUrl: String(process.env.ELASTICSEARCH_URL || ""),
   doElasticsearchWork: Boolean(Number(process.env.DO_ELASTICSEARCH_WORK)),
   enableElasticsearchAsks: Boolean(Number(process.env.ENABLE_ELASTICSEARCH_ASKS)),
+  deleteExpiredBidsElasticsearch: Boolean(Number(process.env.DELETE_EXPIRED_BIDS_ELASTICSEARCH)),
 
   // RabbitMq
   rabbitHttpUrl: `http://${String(process.env.RABBIT_USERNAME)}:${String(
@@ -200,4 +201,8 @@ export const config = {
   forceIpfsGateway: Boolean(Number(process.env.FORCE_IPFS_GATEWAY)),
 
   yugalabsMetadataApiUserAgent: String(process.env.YUGALABS_METADATA_API_USER_AGENT || ""),
+
+  disabledDatadogPluginsTracing: process.env.DISABLED_DATADOG_PLUGINS_TRACING
+    ? String(process.env.DISABLED_DATADOG_PLUGINS_TRACING).split(",")
+    : "ioredis,amqplib,pg,fetch".split(","),
 };
