@@ -454,10 +454,11 @@ export const getExecuteSellV7Options: RouteOptions = {
                 source: source || undefined,
                 fees: additionalFees,
                 builtInFeeBps: builtInFees.map(({ bps }) => bps).reduce((a, b) => a + b, 0),
-                isProtected:
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (order.rawData as any).zone ===
+                isProtected: [
                   Sdk.SeaportBase.Addresses.OpenSeaProtectedOffersZone[config.chainId],
+                  Sdk.SeaportBase.Addresses.OpenSeaV16SignedZone[config.chainId],
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ].includes((order.rawData as any).zone),
               },
               {
                 kind: token.kind,
@@ -936,7 +937,22 @@ export const getExecuteSellV7Options: RouteOptions = {
 
       if (payload.source) {
         for (const globalFee of globalFees) {
-          await feeRecipients.getOrInsert(globalFee.recipient, payload.source, "marketplace");
+          const feeRecipient = await feeRecipients.getOrInsert(
+            globalFee.recipient,
+            payload.source,
+            "marketplace"
+          );
+
+          if (feeRecipient.kind !== "marketplace") {
+            logger.info(
+              "fee-recipients",
+              JSON.stringify({
+                message: `feeRecipient already exist with kind royalty`,
+                request: payload,
+                apiKey,
+              })
+            );
+          }
         }
       }
 

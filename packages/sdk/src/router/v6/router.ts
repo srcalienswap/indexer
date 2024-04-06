@@ -529,7 +529,9 @@ export class Router {
             swapDetails.push({
               tokenIn: buyInCurrency,
               tokenOut: detail.currency,
-              tokenOutAmount: order.params.itemPrice,
+              tokenOutAmount: bn(order.params.itemPrice)
+                .div(order.params.amount)
+                .mul(detail.amount ?? 1),
               recipient: taker,
               refundTo: taker,
               details: [detail],
@@ -646,11 +648,14 @@ export class Router {
       const operator = exchange.contract.address;
 
       for (const d of blockedPaymentProcessorDetails) {
+        const order = d.order as Sdk.PaymentProcessorV2.Order;
         if (buyInCurrency !== d.currency) {
           swapDetails.push({
             tokenIn: buyInCurrency,
             tokenOut: d.currency,
-            tokenOutAmount: d.price,
+            tokenOutAmount: bn(order.params.itemPrice)
+              .div(order.params.amount)
+              .mul(d.amount ?? 1),
             recipient: taker,
             refundTo: taker,
             details: [d],
@@ -932,13 +937,19 @@ export class Router {
               details[i] = {
                 ...detail,
                 kind: "seaport-v1.5",
-                order: new Sdk.SeaportV15.Order(this.chainId, result.data.order),
+                order: new Sdk.SeaportV15.Order(this.chainId, {
+                  ...result.data.order,
+                  extraData: result.data.extraData,
+                }),
               };
             } else {
               details[i] = {
                 ...detail,
                 kind: "seaport-v1.6",
-                order: new Sdk.SeaportV16.Order(this.chainId, result.data.order),
+                order: new Sdk.SeaportV16.Order(this.chainId, {
+                  ...result.data.order,
+                  extraData: result.data.extraData,
+                }),
               };
             }
           } catch (error) {
@@ -1387,7 +1398,7 @@ export class Router {
 
         case "seaport-v1.6":
           if (!seaportV16Details[currency]) {
-            seaportV15Details[currency] = [];
+            seaportV16Details[currency] = [];
           }
           detailsRef = seaportV16Details[currency];
           break;
@@ -4562,7 +4573,7 @@ export class Router {
 
       const fees = getFees(detail);
 
-      if (detail.kind !== "seaport-v1.5-partial") {
+      if (detail.kind !== "seaport-v1.5-partial" && detail.kind !== "seaport-v1.6-partial") {
         addRouterTags(detail.kind, 1, fees.length);
       }
 

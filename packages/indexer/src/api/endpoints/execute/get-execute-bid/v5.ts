@@ -544,9 +544,9 @@ export const getExecuteBidV5Options: RouteOptions = {
           try {
             if (p.token || p.collection) {
               const contract = p.token ? p.token.split(":")[0] : p.collection!;
+              const configV1 = await erc721c.v1.getConfigFromDb(contract);
+              const configV2 = await erc721c.v2.getConfigFromDb(contract);
 
-              const configV1 = await erc721c.v1.getConfig(contract);
-              const configV2 = await erc721c.v2.getConfig(contract);
               if (
                 (configV1 && [4, 6].includes(configV1.transferSecurityLevel)) ||
                 (configV2 && [6, 8].includes(configV2.transferSecurityLevel))
@@ -647,6 +647,11 @@ export const getExecuteBidV5Options: RouteOptions = {
           if (params.orderKind === "seaport-v1.4") {
             params.orderKind = "seaport-v1.5";
           }
+
+          if (params.orderbook === "opensea" && params.orderKind === "seaport-v1.5") {
+            params.orderKind = "seaport-v1.6";
+          }
+
           // Force usage of looks-rare-v2
           if (params.orderKind === "looks-rare") {
             params.orderKind = "looks-rare-v2";
