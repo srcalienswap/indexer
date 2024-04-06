@@ -2,7 +2,6 @@ import { defaultAbiCoder } from "@ethersproject/abi";
 import { AddressZero } from "@ethersproject/constants";
 import * as Sdk from "@reservoir0x/sdk";
 import { TxData } from "@reservoir0x/sdk/dist/utils";
-import { isNative } from "@reservoir0x/sdk/dist/router/v6/utils";
 import _ from "lodash";
 
 import { idb } from "@/common/db";
@@ -55,7 +54,7 @@ export type AbiParam =
       params: AbiParam[];
     }
   | {
-      kind: "totalPrice";
+      kind: "price";
       abiType: string;
     };
 
@@ -187,7 +186,7 @@ export const generateCollectionMintTxData = async (
     price = matchingEntry.price;
   }
 
-  const totalPrice = bn(price!).mul(quantity);
+  const priceForQuantity = bn(price!).mul(quantity);
 
   let hasExplicitRecipient = false;
   const encodeParams = async (params: AbiParam[]) => {
@@ -386,10 +385,10 @@ export const generateCollectionMintTxData = async (
           break;
         }
 
-        case "totalPrice": {
+        case "price": {
           abiData.push({
             abiType: p.abiType,
-            abiValue: totalPrice,
+            abiValue: priceForQuantity,
           });
 
           break;
@@ -425,14 +424,15 @@ export const generateCollectionMintTxData = async (
           .slice(2)
       : "");
 
-  const notNative = !isNative(config.chainId, collectionMint.currency);
-
   return {
     txData: {
       from: minter,
       to: tx.to,
       data,
-      value: !notNative ? bn(price!).mul(quantity).toHexString() : undefined,
+      value:
+        collectionMint.currency !== Sdk.Common.Addresses.Native[config.chainId]
+          ? undefined
+          : priceForQuantity.toHexString(),
     },
     price: price!,
     hasExplicitRecipient,

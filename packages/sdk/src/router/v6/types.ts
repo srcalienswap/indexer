@@ -279,9 +279,10 @@ export type MintDetails = {
   fees: Fee[];
   token: string;
   quantity: number;
-  currency: string;
-  price?: string;
   comment?: string;
+  // Only relevant for ERC20 mints
+  currency?: string;
+  price?: string;
 };
 
 export type FillMintsResult = {

@@ -266,14 +266,19 @@ export class Router {
   ): Promise<FillMintsResult> {
     const txs: FillMintsResult["txs"][0][] = [];
     const success: { [orderId: string]: boolean } = {};
+
+    // Only relevant for ERC20 mints
     const approvals: FTApproval[] = [];
 
     const sender = options?.relayer ?? taker;
-    const hasNoneNativeMint = details.some((c) => !isNative(this.chainId, c.currency));
+    const hasNoneNativeMint = details.some(
+      (c) => !isNative(this.chainId, c.currency ?? Sdk.Common.Addresses.Native[this.chainId])
+    );
 
     if (
       !Addresses.MintModule[this.chainId] ||
       options?.forceDirectFilling ||
+      // ERC20 mints
       hasNoneNativeMint ||
       // Single mints with no fees, no comment and no `relayer` field (only if the mint doesn't have an explicit recipient)
       (details.length === 1 &&
@@ -284,7 +289,7 @@ export class Router {
       // Under some conditions, we simply return that transaction data back to the caller
 
       for (const { txData, orderId, currency, price, quantity } of details) {
-        if (price) {
+        if (price && currency && currency !== Sdk.Common.Addresses.Native[this.chainId]) {
           approvals.push({
             currency: currency,
             amount: bn(price).mul(quantity),
@@ -293,6 +298,7 @@ export class Router {
             txData: generateFTApprovalTxData(currency, taker, txData.to.toLowerCase()),
           });
         }
+
         txs.push({
           approvals,
           txData: {

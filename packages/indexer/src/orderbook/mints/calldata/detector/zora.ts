@@ -3,6 +3,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { Contract } from "@ethersproject/contracts";
 import * as Sdk from "@reservoir0x/sdk";
 import axios from "axios";
+
 import { idb } from "@/common/db";
 import { logger } from "@/common/logger";
 import { baseProvider } from "@/common/provider";
@@ -245,6 +246,7 @@ export const extractByCollectionERC1155 = async (
   minter?: string
 ): Promise<CollectionMint[]> => {
   const results: CollectionMint[] = [];
+
   const c = new Contract(
     collection,
     new Interface([
@@ -288,8 +290,15 @@ export const extractByCollectionERC1155 = async (
       }
     }
 
-    defaultMinters.push(Sdk.Zora.Addresses.ERC1155ZoraFixedPriceEMinter[config.chainId]);
-    defaultMinters.push(Sdk.Zora.Addresses.ERC1155ZoraMerkleMinter[config.chainId]);
+    // Some known minters
+    for (const minter of [
+      Sdk.Zora.Addresses.ERC1155ZoraMerkleMinter[config.chainId],
+      Sdk.Zora.Addresses.ERC1155ZoraFixedPriceEMinter[config.chainId],
+    ]) {
+      if (minter) {
+        defaultMinters.push(minter);
+      }
+    }
 
     for (const minter of defaultMinters) {
       // Try both `getPermissions` and `permissions` to cover as many versions as possible
@@ -547,8 +556,11 @@ export const extractByCollectionERC1155 = async (
             c.getTokenInfo(tokenId),
           ]);
 
-          // No need include mintFee
+          const currency = saleConfig.currency.toLowerCase();
+
+          // No need to include the mint fee
           const price = saleConfig.pricePerToken.toString();
+
           results.push({
             collection,
             contract: collection,
@@ -582,13 +594,13 @@ export const extractByCollectionERC1155 = async (
                       abiValue: tokenId,
                     },
                     {
-                      kind: "totalPrice",
+                      kind: "price",
                       abiType: "uint256",
                     },
                     {
                       kind: "unknown",
                       abiType: "address",
-                      abiValue: saleConfig.currency,
+                      abiValue: currency,
                     },
                     {
                       kind: "referrer",
@@ -604,7 +616,7 @@ export const extractByCollectionERC1155 = async (
               info: minter ? { minter } : undefined,
             },
             tokenId,
-            currency: saleConfig.currency,
+            currency,
             price,
             maxMintsPerWallet: toSafeNumber(saleConfig.maxTokensPerAddress),
             maxSupply: toSafeNumber(tokenInfo.maxSupply),
@@ -635,22 +647,26 @@ export const extractByCollectionERC1155 = async (
 
 export const extractByTx = async (
   collection: string,
-  rawTx: Transaction
+  rootTx: Transaction
 ): Promise<CollectionMint[]> => {
-  const isMulticall = rawTx.data.includes("0xac9650d8");
-  const nestedTxs: Transaction[] = [rawTx];
+  const nestedTxs: Transaction[] = [rootTx];
 
+  const isMulticall = rootTx.data.startsWith("0xac9650d8");
   if (isMulticall) {
-    const multicall = new Interface(["function multicall(bytes[] calls)"]).decodeFunctionData(
-      "multicall",
-      rawTx.data
-    );
+    try {
+      const multicall = new Interface(["function multicall(bytes[] calls)"]).decodeFunctionData(
+        "multicall",
+        rootTx.data
+      );
 
-    for (const call of multicall.calls) {
-      nestedTxs.push({
-        ...rawTx,
-        data: call,
-      });
+      for (const call of multicall.calls) {
+        nestedTxs.push({
+          ...rootTx,
+          data: call,
+        });
+      }
+    } catch {
+      // Skip errors
     }
   }
 
@@ -684,7 +700,7 @@ export const extractByTx = async (
         "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes minterArguments, address mintReferral)",
         "function premint((address, string, string) contractConfig, ((string, uint256, uint64, uint96, uint64, uint64, uint32, uint32, address, address), uint32 tokenId, uint32, bool) premintConfig, bytes signature, uint256 quantityToMint, string mintComment)",
         "function callSale(uint256 tokenId, address salesConfig, bytes data)",
-        "function mint(address mintTo,uint256 quantity,address tokenAddress,uint256 tokenId,uint256 totalValue,address currency,address mintReferral,string comment)",
+        "function mint(address mintTo, uint256 quantity, address tokenAddress, uint256 tokenId, uint256 totalValue, address currency, address mintReferral, string comment)",
       ]);
 
       let tokenId: string;
@@ -715,7 +731,7 @@ export const extractByTx = async (
           minter = tx.to;
           tokenId = iface
             .decodeFunctionData(
-              "mint(address mintTo,uint256 quantity,address tokenAddress,uint256 tokenId,uint256 totalValue,address currency,address mintReferral,string comment)",
+              "mint(address mintTo, uint256 quantity, address tokenAddress, uint256 tokenId, uint256 totalValue, address currency, address mintReferral, string comment)",
               tx.data
             )
             .tokenId.toString();

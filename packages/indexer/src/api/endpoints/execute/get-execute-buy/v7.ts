@@ -2278,8 +2278,9 @@ export const getExecuteBuyV7Options: RouteOptions = {
 
         let safeToUse = true;
         for (const { txData, approvals } of mintsResult.txs) {
-          // Skip for ERC20 mint
+          // ERC20 mints (which will have a corresponding approval) need to be minted directly
           if (approvals.length) {
+            safeToUse = false;
             continue;
           }
 
@@ -2443,6 +2444,7 @@ export const getExecuteBuyV7Options: RouteOptions = {
             });
           }
         }
+
         if (signaturesPaymentProcessor.length && !steps[3].items.length) {
           const exchange = new Sdk.PaymentProcessor.Exchange(config.chainId);
           txData.data = exchange.attachTakerSignatures(txData.data, signaturesPaymentProcessor);
