@@ -43,7 +43,7 @@ export async function attachOrderbookFee(
           params.fee[0] = newFeeBps;
         }
       } else {
-        return;
+        throw new Error("Too many fees");
       }
     }
 
