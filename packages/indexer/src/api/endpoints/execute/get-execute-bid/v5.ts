@@ -319,7 +319,6 @@ export const getExecuteBidV5Options: RouteOptions = {
         royaltyBps?: number;
         excludeFlaggedTokens: boolean;
         fees?: string[];
-        feeRecipient?: string[];
         marketplaceFees?: string[];
         marketplaceFlatFees?: string[];
         customRoyalties?: string[];

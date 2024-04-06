@@ -295,7 +295,6 @@ export const getExecuteListV5Options: RouteOptions = {
       orderKind: OrderKind;
       orderbook: string;
       fees?: string[];
-      feeRecipient?: string[];
       marketplaceFees?: string[];
       marketplaceFlatFees?: string[];
       customRoyalties?: string[];
