@@ -1626,14 +1626,12 @@ export const getExecuteBidV5Options: RouteOptions = {
                     maker,
                     contract,
                     tokenId,
-                    // apiKey: request.pre?.metrics?.apiKey,
                   });
                 } else if (collection) {
                   order = await paymentProcessorBuyCollection.build({
                     ...params,
                     maker,
                     collection,
-                    // apiKey: request.pre?.metrics?.apiKey,
                   });
                 } else {
                   return errors.push({
