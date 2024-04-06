@@ -299,8 +299,14 @@ export class Router {
           });
         }
 
-        txs.push({
+        // Ensure approvals are unique
+        const uniqueApprovals = uniqBy(
           approvals,
+          ({ txData: { from, to, data } }) => `${from}-${to}-${data}`
+        );
+
+        txs.push({
+          approvals: uniqueApprovals,
           txData: {
             ...txData,
             from: sender,

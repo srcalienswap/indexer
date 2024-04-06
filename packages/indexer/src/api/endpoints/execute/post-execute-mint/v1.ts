@@ -26,6 +26,7 @@ import {
 import { getNFTTransferEvents } from "@/orderbook/mints/simulation";
 import { getExecuteError } from "@/orderbook/orders/errors";
 import { getCurrency } from "@/utils/currencies";
+import * as onChainData from "@/utils/on-chain-data";
 import { ExecutionsBuffer } from "@/utils/executions";
 
 const version = "v1";
@@ -1105,6 +1106,21 @@ export const postExecuteMintV1Options: RouteOptions = {
             throw getExecuteError(
               "Balance too low to proceed with transaction (use skipBalanceCheck=true to skip balance checking)"
             );
+          }
+
+          // Handle approvals
+          for (const approval of approvals) {
+            const approvedAmount = await onChainData
+              .fetchAndUpdateFtApproval(approval.currency, approval.owner, approval.operator)
+              .then((a) => a.value);
+
+            const isApproved = bn(approvedAmount).gte(approval.amount);
+            if (!isApproved) {
+              steps[0].items.push({
+                status: "incomplete",
+                data: approval.txData,
+              });
+            }
           }
         } else {
           // Get the price in the buy-in currency via the transaction value
