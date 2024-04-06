@@ -23,7 +23,7 @@ import { OrderKind, checkBlacklistAndFallback } from "@/orderbook/orders";
 import * as b from "@/utils/auth/blur";
 import { ExecutionsBuffer } from "@/utils/executions";
 import { checkAddressIsBlockedByOFAC } from "@/utils/ofac";
-import * as orderbookFee from "@/orderbook/fee";
+import * as orderbookFee from "@/utils/orderbook-fee";
 
 // Blur
 import * as blurSellToken from "@/orderbook/orders/blur/build/sell/token";

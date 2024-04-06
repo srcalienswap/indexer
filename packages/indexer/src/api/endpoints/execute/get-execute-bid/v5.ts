@@ -27,8 +27,8 @@ import * as e from "@/utils/auth/erc721c";
 import * as erc721c from "@/utils/erc721c";
 import { ExecutionsBuffer } from "@/utils/executions";
 import { checkAddressIsBlockedByOFAC } from "@/utils/ofac";
+import * as orderbookFee from "@/utils/orderbook-fee";
 import { getEphemeralPermit, getEphemeralPermitId, saveEphemeralPermit } from "@/utils/permits";
-import * as orderbookFee from "@/orderbook/fee";
 
 // Blur
 import * as blurBuyCollection from "@/orderbook/orders/blur/build/buy/collection";
