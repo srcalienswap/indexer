@@ -2,7 +2,7 @@ import { getCreate2Address } from "@ethersproject/address";
 import { keccak256 } from "@ethersproject/solidity";
 import * as Sdk from "@reservoir0x/sdk";
 
-import { idb, pgp, redb } from "@/common/db";
+import { idb, pgp } from "@/common/db";
 import { fromBuffer, toBuffer, bn } from "@/common/utils";
 import { config } from "@/config/index";
 
@@ -40,7 +40,7 @@ export const generatePaymentSplit = async (apiKey: string, originalFee: Fee, res
     for (const fee of [originalFee, reservoirFee]) {
       splitFees.push({
         recipient: fee.recipient,
-        bps: Math.round((originalFee.bps / totalBps) * MAX_BPS),
+        bps: Math.round((fee.bps / totalBps) * MAX_BPS),
       });
     }
 
@@ -48,6 +48,11 @@ export const generatePaymentSplit = async (apiKey: string, originalFee: Fee, res
     const totalSplitFeesBps = splitFees.map((f) => f.bps).reduce((a, b) => a + b);
     if (totalSplitFeesBps < MAX_BPS) {
       splitFees[0].bps += MAX_BPS - totalSplitFeesBps;
+    }
+
+    // Just for safety
+    if (totalSplitFeesBps !== MAX_BPS) {
+      throw new Error("Sum of fees should be exactly 1000000");
     }
 
     // Sort by recipient
@@ -60,22 +65,18 @@ export const generatePaymentSplit = async (apiKey: string, originalFee: Fee, res
     const splitAddress = getCreate2Address(
       Sdk.ZeroExSplits.Addresses.SplitMain[config.chainId],
       splitHash,
-      keccak256(
-        ["bytes"],
-        [
-          // TODO: We should make sure the init code is the same across all supported chains (non-EVM compatible chains like zkSync might be problematic)
-          "0x3d605d80600a3d3981f336603057343d52307f830d2d700a97af574b186c80d40429385d24241565b08a7c559ba283a964d9b160203da23d3df35b3d3d3d3d363d3d37363d73d94c0ce4f8eefa4ebf44bf6665688edeef213b335af43d3d93803e605b57fd5bf3",
-        ]
-      )
+      keccak256(["bytes"], [Sdk.ZeroExSplits.Addresses.SplitWalletInitCode[config.chainId]])
     );
 
-    const existingSplit = await getPaymentSplitFromDb(splitAddress);
+    let existingSplit = await getPaymentSplitFromDb(splitAddress);
     if (!existingSplit) {
       await savePaymentSplit({
         address: splitAddress,
         apiKey,
         fees: splitFees,
       });
+
+      existingSplit = await getPaymentSplitFromDb(splitAddress);
     }
 
     return existingSplit;
@@ -87,7 +88,7 @@ export const generatePaymentSplit = async (apiKey: string, originalFee: Fee, res
 };
 
 export const getPaymentSplitFromDb = async (address: string): Promise<PaymentSplit | undefined> => {
-  const results = await redb.manyOrNone(
+  const results = await idb.manyOrNone(
     `
       SELECT
         payment_splits.address,
@@ -95,9 +96,9 @@ export const getPaymentSplitFromDb = async (address: string): Promise<PaymentSpl
         payment_splits.is_deployed,
         payment_splits_recipients.recipient,
         payment_splits_recipients.amount_bps,
-        floor(extract(epoch FROM payment_splits.last_distribution_time) / 1000) AS last_distribution_time,
-        floor(extract(epoch FROM payment_splits.created_at) / 1000) AS created_at,
-        floor(extract(epoch FROM payment_splits.updated_at) / 1000) AS updated_at
+        extract(epoch FROM payment_splits.last_distribution_time) AS last_distribution_time,
+        extract(epoch FROM payment_splits.created_at) AS created_at,
+        extract(epoch FROM payment_splits.updated_at) AS updated_at
       FROM payment_splits
       JOIN payment_splits_recipients
         ON payment_splits.address = payment_splits_recipients.payment_split_address
