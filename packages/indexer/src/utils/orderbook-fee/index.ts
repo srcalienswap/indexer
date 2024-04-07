@@ -1,7 +1,6 @@
 import { AddressZero } from "@ethersproject/constants";
 import { OrderKind } from "@/orderbook/orders";
-import { getSplitsAddress } from "@/utils/fee-split";
-import { Royalty } from "../royalties";
+import { generatePaymentSplit, supportsPaymentSplits } from "@/utils/payment-splits";
 
 export const FEE_BPS = 0;
 export const FEE_RECIPIENT = AddressZero;
@@ -12,9 +11,8 @@ export const attachOrderbookFee = async (
     feeRecipient?: string[];
     orderKind: OrderKind;
     orderbook: string;
-    currency?: string;
   },
-  apiKey?: string
+  apiKey: string
 ) => {
   // Only native orders
   if (params.orderbook != "reservoir") {
@@ -34,38 +32,32 @@ export const attachOrderbookFee = async (
 
     // Skip single fee marketplaces for now
     if (params.fee.length >= 1 && singleFeeOrderKinds.includes(params.orderKind)) {
-      if (apiKey) {
-        const allFees: Royalty[] = [];
-        params.fee.forEach((fee, index) => {
-          if (params.feeRecipient && params.feeRecipient[index]) {
-            allFees.push({
-              bps: Number(fee),
-              recipient: params.feeRecipient[index],
-            });
-          }
-        });
-
-        const newFeeBps = allFees.reduce((total, item) => total + item.bps, 0) + FEE_BPS;
-        const newRecipient = await getSplitsAddress(
-          apiKey,
-          allFees,
-          {
-            bps: FEE_BPS,
-            recipient: FEE_RECIPIENT,
-          },
-          params.currency
-        );
-
-        if (newRecipient) {
-          // Override with the split address
-          params.feeRecipient = [newRecipient.address];
-          params.fee = [String(newFeeBps)];
-        }
+      // Skip chains where payment splits are not supported
+      if (!supportsPaymentSplits()) {
+        return;
       }
-      return;
-    }
 
-    params.fee.push(String(FEE_BPS));
-    params.feeRecipient.push(FEE_RECIPIENT);
+      const paymentSplit = await generatePaymentSplit(
+        apiKey,
+        {
+          recipient: params.feeRecipient[0],
+          bps: Number(params.fee),
+        },
+        {
+          recipient: FEE_RECIPIENT,
+          bps: FEE_BPS,
+        }
+      );
+      if (!paymentSplit) {
+        throw new Error("Could not generate payment split");
+      }
+
+      // Override
+      params.feeRecipient = [paymentSplit.address];
+      params.fee = [String(params.fee.map(Number).reduce((a, b) => a + b) + FEE_BPS)];
+    } else {
+      params.fee.push(String(FEE_BPS));
+      params.feeRecipient.push(FEE_RECIPIENT);
+    }
   }
 };

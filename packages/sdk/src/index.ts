@@ -53,7 +53,7 @@ import * as ArtBlocks from "./artblocks";
 import * as Mooar from "./mooar";
 import * as HighlightXyz from "./highlightxyz";
 import * as FairXyz from "./fairxyz";
-import * as ZeroSplits from "./zero-splits";
+import * as ZeroExSplits from "./zeroex-splits";
 
 export {
   // Common
@@ -113,5 +113,5 @@ export {
   Mooar,
   HighlightXyz,
   FairXyz,
-  ZeroSplits,
+  ZeroExSplits,
 };
