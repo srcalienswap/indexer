@@ -15,22 +15,20 @@ type SplitConfig = {
 
 export async function getSplitsAddress(
   apiKey: string,
-  originalFee: Royalty,
+  originalFees: Royalty[],
   orderBookFee: Royalty,
   currency?: string
 ) {
   try {
-    const totalBps = originalFee.bps + orderBookFee.bps;
+    const totalBps = originalFees.reduce((total, item) => total + item.bps, 0) + orderBookFee.bps;
     const newFees: Royalty[] = [];
-    newFees.push({
-      ...orderBookFee,
-      bps: Math.round((orderBookFee.bps / totalBps) * 1e6),
-    });
 
-    newFees.push({
-      ...originalFee,
-      bps: Math.round((originalFee.bps / totalBps) * 1e6),
-    });
+    for (const originalFee of originalFees.concat(orderBookFee)) {
+      newFees.push({
+        ...originalFee,
+        bps: Math.round((originalFee.bps / totalBps) * 1e6),
+      });
+    }
 
     // Sort by account
     newFees.sort((a, b) => {
@@ -46,7 +44,7 @@ export async function getSplitsAddress(
     const configHash = getSplitConfigHash(splitConfig);
     const exist = await getSplitConfigFromDB(configHash);
     if (exist && currency) {
-      // tracking currency used
+      // Tracking the currency have used
       const isNewCurrency = !exist.tokens.includes(currency);
       if (isNewCurrency) {
         await updateSplitTokens(exist.config, [...exist.tokens, currency]);
@@ -75,7 +73,7 @@ export async function getSplitsAddress(
       config: splitConfig,
       tokens: [currency],
     };
-  } catch (error) {
+  } catch {
     // Skip errors
   }
   return undefined;

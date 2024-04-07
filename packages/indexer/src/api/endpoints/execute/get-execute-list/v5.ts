@@ -23,7 +23,7 @@ import { OrderKind, checkBlacklistAndFallback } from "@/orderbook/orders";
 import * as b from "@/utils/auth/blur";
 import { ExecutionsBuffer } from "@/utils/executions";
 import { checkAddressIsBlockedByOFAC } from "@/utils/ofac";
-import * as orderbookFee from "@/orderbook/fee";
+import * as orderbookFee from "@/utils/orderbook-fee";
 
 // Blur
 import * as blurSellToken from "@/orderbook/orders/blur/build/sell/token";
@@ -295,7 +295,6 @@ export const getExecuteListV5Options: RouteOptions = {
       orderKind: OrderKind;
       orderbook: string;
       fees?: string[];
-      feeRecipient?: string[];
       marketplaceFees?: string[];
       marketplaceFlatFees?: string[];
       customRoyalties?: string[];
@@ -481,6 +480,11 @@ export const getExecuteListV5Options: RouteOptions = {
           if (params.orderKind === "seaport-v1.4") {
             params.orderKind = "seaport-v1.5";
           }
+
+          if (params.orderbook === "opensea" && params.orderKind === "seaport-v1.5") {
+            params.orderKind = "seaport-v1.6";
+          }
+
           // Force usage of looks-rare-v2
           if (params.orderKind === "looks-rare") {
             params.orderKind = "looks-rare-v2";

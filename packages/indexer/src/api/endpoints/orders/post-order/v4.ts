@@ -657,9 +657,7 @@ export const postOrderV4Options: RouteOptions = {
                 })
               );
 
-              // Skip in testing
-              const isTesting = Number(process.env.LOCAL_TESTING);
-              if (["already-exists", "success"].includes(result.status) && !isTesting) {
+              if (["already-exists", "success"].includes(result.status)) {
                 const side =
                   orderInfo.orderParams.maxRoyaltyFeeNumerator !== undefined ? "ask" : "bid";
                 let simulationResult: string | undefined;
