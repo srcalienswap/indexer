@@ -14,6 +14,7 @@ import {
 } from "@/metadata/providers/utils";
 import { metadataIndexFetchJob } from "@/jobs/metadata-index/metadata-fetch-job";
 import { redis } from "@/common/redis";
+import _ from "lodash";
 
 export type OnchainMetadataProcessTokenUriJobPayload = {
   contract: string;
@@ -348,14 +349,37 @@ export default class OnchainMetadataProcessTokenUriJob extends AbstractRabbitMqJ
   }
 
   public async addToQueue(params: OnchainMetadataProcessTokenUriJobPayload, delay = 0) {
+    if (
+      _.includes(
+        [
+          "0x5ef20e77ca3b1a980a3b931ef1f7a4b6f23635c9",
+          "0xdd452e56c8e9dcf96e5d1e1e365466fe42ac23bf",
+        ],
+        params.contract
+      )
+    ) {
+      return;
+    }
+
     await this.send({ payload: params }, delay);
   }
 
   public async addToQueueBulk(params: OnchainMetadataProcessTokenUriJobPayload[]) {
     await this.sendBatch(
-      params.map((param) => {
-        return { payload: param };
-      })
+      params
+        .filter(
+          (p) =>
+            !_.includes(
+              [
+                "0x5ef20e77ca3b1a980a3b931ef1f7a4b6f23635c9",
+                "0xdd452e56c8e9dcf96e5d1e1e365466fe42ac23bf",
+              ],
+              p.contract
+            )
+        )
+        .map((param) => {
+          return { payload: param };
+        })
     );
   }
 }
