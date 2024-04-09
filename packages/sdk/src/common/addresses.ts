@@ -113,6 +113,9 @@ export const Usdc: ChainIdToAddressList = {
     "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca", // Bridged
     "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913", // Native
   ],
+  [Network.BaseSepolia]: [
+    "0x036cbd53842c5426634e7929541ec2318f3dcf7e", // Native
+  ],
   [Network.AstarZkevm]: [
     "0xa8ce8aee21bc2a48a5ef670afcc9274c7bbbc035", // Bridged
   ],
