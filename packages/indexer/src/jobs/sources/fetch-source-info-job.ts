@@ -49,6 +49,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
     let tokenUrlAncient8;
     let tokenUrlRedstoneTestnet;
     let tokenUrlBerachainTestnet;
+    let tokenUrlGarnet;
 
     if (!_.startsWith(url, "http")) {
       url = `https://${url}`;
@@ -133,6 +134,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
       tokenUrlAncient8 = this.getTokenUrl(html, url, "ancient8");
       tokenUrlRedstoneTestnet = this.getTokenUrl(html, url, "redstone-testnet");
       tokenUrlBerachainTestnet = this.getTokenUrl(html, url, "berachain-testnet");
+      tokenUrlGarnet = this.getTokenUrl(html, url, "garnet");
     } catch (error) {
       logger.info(this.queueName, `Get html error. sourceDomain=${sourceDomain}, error=${error}`);
     }
@@ -202,6 +204,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
           tokenUrlAncient8,
           tokenUrlRedstoneTestnet,
           tokenUrlBerachainTestnet,
+          tokenUrlGarnet,
         },
       })
     );
@@ -235,6 +238,7 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
       tokenUrlAncient8,
       tokenUrlRedstoneTestnet,
       tokenUrlBerachainTestnet,
+      tokenUrlGarnet,
     });
   }
 

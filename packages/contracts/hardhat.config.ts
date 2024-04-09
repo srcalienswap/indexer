@@ -110,6 +110,9 @@ const getNetworkConfig = (chainId?: number) => {
       case 80085:
         url = "https://artio.rpc.berachain.com";
         break;
+      case 17069:
+        url = "https://rpc.garnet.qry.live";
+        break;
       default:
         throw new Error("Unsupported chain id");
     }
@@ -199,6 +202,7 @@ const config: HardhatUserConfig = {
     apexTestnet: getNetworkConfig(70800),
     redstoneTestnet: getNetworkConfig(17001),
     berachainTestnet: getNetworkConfig(80085),
+    garnet: getNetworkConfig(17069),
   },
   etherscan: {
     apiKey: {
@@ -233,6 +237,7 @@ const config: HardhatUserConfig = {
       apexTestnet: "0x",
       redstoneTestnet: "0x",
       berachainTestnet: "0x",
+      garnet: "0x",
     },
     customChains: [
       // Mainnets
@@ -409,8 +414,16 @@ const config: HardhatUserConfig = {
         network: "berachainTestnet",
         chainId: 80085,
         urls: {
-          apiURL: "https://api.routescan.io/v2/network/testnet/evm/80085/",
-          browserURL: "https://artio.beratrail.io/",
+          apiURL: "https://api.routescan.io/v2/network/testnet/evm/80085",
+          browserURL: "https://artio.beratrail.io",
+        },
+      },
+      {
+        network: "garnet",
+        chainId: 17069,
+        urls: {
+          apiURL: "https://api.explorer.garnet.qry.live",
+          browserURL: "https://explorer.garnet.qry.live/",
         },
       },
     ],
