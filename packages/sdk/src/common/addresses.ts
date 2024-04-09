@@ -114,7 +114,7 @@ export const Usdc: ChainIdToAddressList = {
     "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913", // Native
   ],
   [Network.BaseSepolia]: [
-    "0x036CbD53842c5426634e7929541eC2318f3dCF7e", // Native
+    "0x036cbd53842c5426634e7929541ec2318f3dcf7e", // Native
   ],
   [Network.AstarZkevm]: [
     "0xa8ce8aee21bc2a48a5ef670afcc9274c7bbbc035", // Bridged
