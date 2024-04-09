@@ -59,7 +59,7 @@ export default class DeleteArchivedExpiredBidActivitiesJob extends AbstractRabbi
       return;
     }
 
-    await this.send({}, delay);
+    await this.send({ jobId: this.queueName }, delay);
   }
 }
 
