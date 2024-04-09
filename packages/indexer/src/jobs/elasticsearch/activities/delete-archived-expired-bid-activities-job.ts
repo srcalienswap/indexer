@@ -5,6 +5,7 @@ import { AbstractRabbitMqJobHandler } from "@/jobs/abstract-rabbit-mq-job-handle
 import { PendingExpiredBidActivitiesQueue } from "@/elasticsearch/indexes/activities/pending-expired-bid-activities-queue";
 import * as ActivitiesIndex from "@/elasticsearch/indexes/activities";
 import { redis } from "@/common/redis";
+import { RabbitMQMessage } from "@/common/rabbit-mq";
 
 const BATCH_SIZE = 1000;
 const BATCH_DELAY = 10 * 1000;
@@ -19,6 +20,9 @@ export default class DeleteArchivedExpiredBidActivitiesJob extends AbstractRabbi
   singleActiveConsumer = true;
 
   public async process() {
+    let addToQueue = false;
+    let addToQueueDelay;
+
     const pendingExpiredBidActivitiesQueue = new PendingExpiredBidActivitiesQueue();
     const pendingActivitiesCount = await pendingExpiredBidActivitiesQueue.count();
 
@@ -47,10 +51,20 @@ export default class DeleteArchivedExpiredBidActivitiesJob extends AbstractRabbi
           await pendingExpiredBidActivitiesQueue.add(pendingActivityIds);
         }
 
-        if (pendingActivitiesCount > batchSize) {
-          await deleteArchivedExpiredBidActivitiesJob.addToQueue(batchDelay);
-        }
+        addToQueue = pendingActivitiesCount > batchSize;
+        addToQueueDelay = batchDelay;
       }
+    }
+
+    return { addToQueue, addToQueueDelay };
+  }
+
+  public async onCompleted(
+    message: RabbitMQMessage,
+    processResult: { addToQueue: boolean; addToQueueDelay?: number }
+  ) {
+    if (processResult.addToQueue) {
+      await this.addToQueue(processResult.addToQueueDelay);
     }
   }
 
