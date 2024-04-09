@@ -309,6 +309,11 @@ jobs:
             ./prod/platform/indexer-api-berachain-testnet.yaml \
             ./prod/platform/indexer-worker-berachain-testnet.yaml \
             ./prod/platform/indexer-worker-master-berachain-testnet.yaml
+          
+          ./utils/version_update_batch.sh indexer-garnet ${{ github.sha }} \
+            ./prod/platform/indexer-api-garnet.yaml \
+            ./prod/platform/indexer-worker-garnet.yaml \
+            ./prod/platform/indexer-worker-master-garnet.yaml
 
       - name: Post to Slack
         if: ${{ always() }}

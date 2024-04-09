@@ -105,6 +105,9 @@ export const getNetworkName = () => {
     case 80085:
       return "berachain-testnet";
 
+    case 17069:
+      return "garnet";
+
     default:
       return "unknown";
   }
@@ -1840,7 +1843,7 @@ export const getNetworkSettings = (): NetworkSettings => {
         },
       };
     }
-    // Apex Testnet
+    // Redstone Testnet
     case 17001: {
       return {
         ...defaultNetworkSettings,
@@ -1878,6 +1881,39 @@ export const getNetworkSettings = (): NetworkSettings => {
       return {
         ...defaultNetworkSettings,
         enableWebSocket: true,
+        isTestnet: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 5,
+        lastBlockLatency: 5,
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                    INSERT INTO currencies (
+                      contract,
+                      name,
+                      symbol,
+                      decimals,
+                      metadata
+                    ) VALUES (
+                      '\\x0000000000000000000000000000000000000000',
+                      'Ether',
+                      'ETH',
+                      18,
+                      '{"coingeckoCurrencyId": "ethereum", "image": "https://assets.coingecko.com/coins/images/279/large/ethereum.png"}'
+                    ) ON CONFLICT DO NOTHING
+                  `
+            ),
+          ]);
+        },
+      };
+    }
+    // Garnet
+    case 17069: {
+      return {
+        ...defaultNetworkSettings,
+        enableWebSocket: false,
         isTestnet: true,
         realtimeSyncMaxBlockLag: 32,
         realtimeSyncFrequencySeconds: 5,

@@ -158,6 +158,7 @@ export enum Network {
   ApexTestnet = 70800,
   RedstoneTestnet = 17001,
   BerachainTestnet = 80085,
+  Garnet = 17069,
 }
 
 export type ChainIdToAddress = { [chainId: number]: string };
