@@ -71,6 +71,7 @@ export const WNative: ChainIdToAddress = {
   [Network.ApexTestnet]: "0xBfB86801053600dd3C7FCBa6d5E85017a64cE728",
   [Network.RedstoneTestnet]: "0x09d940117bd1df3165a22820517a946426605f60",
   [Network.BerachainTestnet]: "0x5806e416da447b267cea759358cf22cc41fae80f",
+  [Network.Garnet]: "0x4200000000000000000000000000000000000006",
 };
 
 export const Usdc: ChainIdToAddressList = {
