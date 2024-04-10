@@ -104,9 +104,6 @@ const getNetworkConfig = (chainId?: number) => {
       case 70800:
         url = "https://rpc-pop-testnet-barret-oxaolmcfss.t.conduit.xyz";
         break;
-      case 17001:
-        url = "https://rpc.holesky.redstone.xyz";
-        break;
       case 80085:
         url = "https://artio.rpc.berachain.com";
         break;
@@ -203,7 +200,6 @@ const config: HardhatUserConfig = {
     baseSepolia: getNetworkConfig(84532),
     blastSepolia: getNetworkConfig(168587773),
     apexTestnet: getNetworkConfig(70800),
-    redstoneTestnet: getNetworkConfig(17001),
     berachainTestnet: getNetworkConfig(80085),
     garnet: getNetworkConfig(17069),
     redstone: getNetworkConfig(690),
@@ -239,7 +235,6 @@ const config: HardhatUserConfig = {
       baseSepolia: "0x",
       blastSepolia: process.env.ETHERSCAN_API_KEY_BLAST ?? "",
       apexTestnet: "0x",
-      redstoneTestnet: "0x",
       berachainTestnet: "0x",
       garnet: "0x",
       redstone: "0x",
@@ -405,14 +400,6 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorerl2new-pop-testnet-barret-oxaolmcfss.t.conduit.xyz/api",
           browserURL: "https://explorerl2new-pop-testnet-barret-oxaolmcfss.t.conduit.xyz/",
-        },
-      },
-      {
-        network: "redstoneTestnet",
-        chainId: 17001,
-        urls: {
-          apiURL: "https://17001-explorer-api.quarry.linfra.xyz/api",
-          browserURL: "https://explorer.holesky.redstone.xyz/",
         },
       },
       {

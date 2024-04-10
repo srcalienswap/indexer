@@ -156,7 +156,6 @@ export enum Network {
   BaseSepolia = 84532,
   BlastSepolia = 168587773,
   ApexTestnet = 70800,
-  RedstoneTestnet = 17001,
   BerachainTestnet = 80085,
   Garnet = 17069,
   Redstone = 690,
