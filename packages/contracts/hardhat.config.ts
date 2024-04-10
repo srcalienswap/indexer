@@ -113,6 +113,9 @@ const getNetworkConfig = (chainId?: number) => {
       case 17069:
         url = "https://rpc.garnet.qry.live";
         break;
+      case 690:
+        url = "https://rpc.redstonechain.com";
+        break;
       default:
         throw new Error("Unsupported chain id");
     }
@@ -203,6 +206,7 @@ const config: HardhatUserConfig = {
     redstoneTestnet: getNetworkConfig(17001),
     berachainTestnet: getNetworkConfig(80085),
     garnet: getNetworkConfig(17069),
+    redstone: getNetworkConfig(690),
   },
   etherscan: {
     apiKey: {
@@ -238,6 +242,7 @@ const config: HardhatUserConfig = {
       redstoneTestnet: "0x",
       berachainTestnet: "0x",
       garnet: "0x",
+      redstone: "0x",
     },
     customChains: [
       // Mainnets
@@ -424,6 +429,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.explorer.garnet.qry.live",
           browserURL: "https://explorer.garnet.qry.live/",
+        },
+      },
+      {
+        network: "redstone",
+        chainId: 690,
+        urls: {
+          apiURL: "https://explorer.redstone.xyz",
+          browserURL: "https://api.explorer.redstonechain.com/",
         },
       },
     ],
