@@ -764,7 +764,7 @@ export const getExecuteBidV5Options: RouteOptions = {
                 const ethBalance = await baseProvider.getBalance(maker);
                 if (bn(currencyBalance).add(ethBalance).lt(totalPrice)) {
                   return errors.push({
-                    message: "Maker does not have sufficient balance",
+                    message: `Maker does not have sufficient balance currencyBalance=${currencyBalance.toString()}, ethBalance=${ethBalance.toString()}, totalPrice=${totalPrice.toString()}`,
                     orderIndex: i,
                   });
                 } else {
