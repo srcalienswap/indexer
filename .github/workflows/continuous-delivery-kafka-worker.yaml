@@ -245,6 +245,9 @@ jobs:
           
           ./utils/version_update_batch.sh indexer-garnet ${{ github.sha }} \
             ./prod/platform/indexer-kafka-worker-garnet.yaml
+          
+          ./utils/version_update_batch.sh indexer-redstone ${{ github.sha }} \
+            ./prod/platform/indexer-kafka-worker-redstone.yaml
 
       - name: Post to Slack
         if: ${{ always() }}

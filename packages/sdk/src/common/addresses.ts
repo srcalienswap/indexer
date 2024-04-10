@@ -36,6 +36,7 @@ export const Native: ChainIdToAddress = {
   [Network.RedstoneTestnet]: AddressZero,
   [Network.BerachainTestnet]: AddressZero,
   [Network.Garnet]: AddressZero,
+  [Network.Redstone]: AddressZero,
 };
 
 // Wrapped native currency
@@ -72,6 +73,7 @@ export const WNative: ChainIdToAddress = {
   [Network.RedstoneTestnet]: "0x09d940117bd1df3165a22820517a946426605f60",
   [Network.BerachainTestnet]: "0x5806e416da447b267cea759358cf22cc41fae80f",
   [Network.Garnet]: "0x4200000000000000000000000000000000000006",
+  [Network.Redstone]: "0x4200000000000000000000000000000000000006",
 };
 
 export const Usdc: ChainIdToAddressList = {
@@ -192,6 +194,7 @@ export const Create3Factory: ChainIdToAddress = {
   [Network.RedstoneTestnet]: "0x0000000000000a9efe52e741bcb25da0e4438e71",
   [Network.BerachainTestnet]: "0x0000000000000a9efe52e741bcb25da0e4438e71",
   [Network.Garnet]: "0x0000000000000a9efe52e741bcb25da0e4438e71",
+  [Network.Redstone]: "0x0000000000000a9efe52e741bcb25da0e4438e71",
 };
 
 export const GelatoRelay1BalanceERC2771: ChainIdToAddress = {

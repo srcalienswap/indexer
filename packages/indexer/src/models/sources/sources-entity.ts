@@ -49,6 +49,7 @@ export type SourcesMetadata = {
   tokenUrlRedstoneTestnet?: string;
   tokenUrlBerachainTestnet?: string;
   tokenUrlGarnet?: string;
+  tokenUrlRedstone?: string;
 };
 
 export class SourcesEntity {

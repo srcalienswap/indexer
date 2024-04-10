@@ -314,6 +314,11 @@ jobs:
             ./prod/platform/indexer-api-garnet.yaml \
             ./prod/platform/indexer-worker-garnet.yaml \
             ./prod/platform/indexer-worker-master-garnet.yaml
+          
+          ./utils/version_update_batch.sh indexer-redstone ${{ github.sha }} \
+            ./prod/platform/indexer-api-redstone.yaml \
+            ./prod/platform/indexer-worker-redstone.yaml \
+            ./prod/platform/indexer-worker-master-redstone.yaml
 
       - name: Post to Slack
         if: ${{ always() }}
