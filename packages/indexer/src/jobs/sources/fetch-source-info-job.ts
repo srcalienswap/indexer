@@ -47,7 +47,6 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
     let tokenUrlImmutableZkevmTestnet;
     let tokenUrlAncient8Testnet;
     let tokenUrlAncient8;
-    let tokenUrlRedstoneTestnet;
     let tokenUrlBerachainTestnet;
     let tokenUrlGarnet;
     let tokenUrlRedstone;
@@ -133,7 +132,6 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
       tokenUrlImmutableZkevmTestnet = this.getTokenUrl(html, url, "immutable-zkevm-testnet");
       tokenUrlAncient8Testnet = this.getTokenUrl(html, url, "ancient8-testnet");
       tokenUrlAncient8 = this.getTokenUrl(html, url, "ancient8");
-      tokenUrlRedstoneTestnet = this.getTokenUrl(html, url, "redstone-testnet");
       tokenUrlBerachainTestnet = this.getTokenUrl(html, url, "berachain-testnet");
       tokenUrlGarnet = this.getTokenUrl(html, url, "garnet");
       tokenUrlRedstone = this.getTokenUrl(html, url, "redstone");
@@ -204,7 +202,6 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
           tokenUrlImmutableZkevmTestnet,
           tokenUrlAncient8Testnet,
           tokenUrlAncient8,
-          tokenUrlRedstoneTestnet,
           tokenUrlBerachainTestnet,
           tokenUrlGarnet,
           tokenUrlRedstone,
@@ -239,7 +236,6 @@ export default class FetchSourceInfoJob extends AbstractRabbitMqJobHandler {
       tokenUrlImmutableZkevmTestnet,
       tokenUrlAncient8Testnet,
       tokenUrlAncient8,
-      tokenUrlRedstoneTestnet,
       tokenUrlBerachainTestnet,
       tokenUrlGarnet,
       tokenUrlRedstone,
