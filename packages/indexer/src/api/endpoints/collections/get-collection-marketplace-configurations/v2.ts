@@ -543,6 +543,8 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
                 // When enforcing royalties, only OpenSea seaport orders are available
                 if (marketplace.orderbook !== "opensea") {
                   exchange.enabled = false;
+                } else {
+                  exchange.enabled = true;
                 }
               }
 
