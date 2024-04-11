@@ -1,8 +1,9 @@
 import * as Sdk from "@reservoir0x/sdk";
 import { getSourceHash } from "@reservoir0x/sdk/dist/utils";
-import * as erc721c from "@/utils/erc721c";
 
 import { bn } from "@/common/utils";
+import { config } from "@/config/index";
+import * as erc721c from "@/utils/erc721c";
 
 export interface BaseOrderBuildOptions {
   maker: string;
@@ -43,11 +44,18 @@ export const padSourceToSalt = (salt: string, source?: string) => {
   return bn(`0x${prefix}${saltPaddedTo32Bytes.slice(prefix.length)}`).toString();
 };
 
-export const isRestrictedByERC721C = async (contract: string) => {
-  const config = await erc721c.v2.getConfigFromDb(contract);
-  // is OpenSea's custom transfer validator
-  if (config && config.transferValidator === "0xa000027a9b2802e1ddf7000061001e5c005a0000") {
+export const contractUsesOSTransferValidator = async (contract: string) => {
+  const erc721cConfigV2 = await erc721c.v2.getConfigFromDb(contract);
+
+  const osCustomTransferValidator =
+    Sdk.SeaportBase.Addresses.OpenSeaCustomTransferValidator[config.chainId];
+  if (
+    osCustomTransferValidator &&
+    erc721cConfigV2 &&
+    erc721cConfigV2.transferValidator === osCustomTransferValidator
+  ) {
     return true;
   }
+
   return false;
 };

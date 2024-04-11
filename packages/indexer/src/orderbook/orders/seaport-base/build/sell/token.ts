@@ -6,7 +6,7 @@ import { config } from "@/config/index";
 import {
   BaseOrderBuildOptions,
   OrderBuildInfo,
-  isRestrictedByERC721C,
+  contractUsesOSTransferValidator,
 } from "@/orderbook/orders/seaport-base/build/utils";
 
 export interface BuildOrderOptions extends BaseOrderBuildOptions {
@@ -56,10 +56,10 @@ export class SellTokenBuilderBase {
     const builder = new Sdk.SeaportBase.Builders.SingleToken(config.chainId);
 
     if (options.orderbook === "opensea") {
-      if (await isRestrictedByERC721C(options.contract!)) {
-        // Set to SignedZone
+      if (await contractUsesOSTransferValidator(options.contract!)) {
+        // Adjust some parameters for royalty-enforcing orders
         buildInfo.params.zone = Sdk.SeaportBase.Addresses.OpenSeaV16SignedZone[config.chainId];
-        buildInfo.params.orderType = Sdk.SeaportBase.Types.OrderType.FULL_RESTRICTED;
+        buildInfo.params.orderType = Sdk.SeaportBase.Types.OrderType.PARTIAL_RESTRICTED;
       }
     }
 
