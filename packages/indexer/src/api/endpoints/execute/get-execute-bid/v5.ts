@@ -782,7 +782,7 @@ export const getExecuteBidV5Options: RouteOptions = {
                 }
               } else {
                 return errors.push({
-                  message: "Maker does not have sufficient balance",
+                  message: `Maker does not have sufficient balance WNATIVE=${WNATIVE}, BETH=${BETH}, currency=${params.currency}`,
                   orderIndex: i,
                 });
               }
