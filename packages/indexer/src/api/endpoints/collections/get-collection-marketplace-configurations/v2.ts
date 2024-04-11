@@ -11,6 +11,7 @@ import { getNetworkSettings, getSubDomain } from "@/config/network";
 import { OrderKind } from "@/orderbook/orders";
 import { getOrUpdateBlurRoyalties } from "@/utils/blur";
 import { Currency, getCurrency } from "@/utils/currencies";
+import * as erc721c from "@/utils/erc721c";
 import { checkMarketplaceIsFiltered } from "@/utils/marketplace-blacklists";
 import * as marketplaceFees from "@/utils/marketplace-fees";
 import * as paymentProcessor from "@/utils/payment-processor";
@@ -188,19 +189,16 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
         throw Boom.badRequest(`Collection ${params.collection} not found`);
       }
 
+      const contract = fromBuffer(collectionResult.contract);
+
       let defaultRoyalties = collectionResult.royalties as Royalty[] | null;
       if (query.tokenId) {
-        defaultRoyalties = await onchain.getOnChainRoyalties(
-          fromBuffer(collectionResult.contract),
-          query.tokenId,
-          "onchain"
-        );
+        defaultRoyalties = await onchain.getOnChainRoyalties(contract, query.tokenId, "onchain");
       }
 
       const ns = getNetworkSettings();
       const marketplaces: Marketplace[] = [];
 
-      await getCurrency(Sdk.Common.Addresses.WNative[config.chainId]);
       const currencies = await Promise.all([
         getCurrency(Sdk.Common.Addresses.WNative[config.chainId]),
         ...Object.keys(ns.supportedBidCurrencies).map((contract) => getCurrency(contract)),
@@ -272,8 +270,7 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
       // Handle Reservoir
       {
         const ppSupportedBidCurrencies =
-          config.chainId === 137 &&
-          params.collection === "0xa87dbcfa18adb7c00593e2c2469d83213c87aecd"
+          config.chainId === 137 && contract === "0xa87dbcfa18adb7c00593e2c2469d83213c87aecd"
             ? [
                 convertCurrencyToToken(
                   await getCurrency("0x456f931298065b1852647de005dd27227146d8b9")
@@ -384,7 +381,7 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
           orderbook: "opensea",
           exchanges: {
             seaport: {
-              orderKind: "seaport-v1.5",
+              orderKind: "seaport-v1.6",
               enabled: false,
               customFeesSupported: false,
               minimumBidExpiry: 15 * 60,
@@ -392,9 +389,7 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
               paymentTokens: collectionResult.payment_tokens?.opensea,
               partialOrderSupported: true,
               traitBidSupported: true,
-              oracleEnabled: Boolean(
-                Sdk.SeaportBase.Addresses.ReservoirCancellationZone[config.chainId]
-              ),
+              oracleEnabled: false,
             },
           },
         });
@@ -402,7 +397,7 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
 
       // Handle Blur
       if (Sdk.Blur.Addresses.Beth[config.chainId]) {
-        const royalties = await getOrUpdateBlurRoyalties(params.collection);
+        const royalties = await getOrUpdateBlurRoyalties(contract);
         if (royalties) {
           marketplaces.push({
             name: "Blur",
@@ -473,30 +468,16 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
 
         await Promise.allSettled(
           Object.values(marketplace.exchanges).map(async (exchange) => {
-            exchange.enabled = !!(
+            exchange.enabled = Boolean(
               marketplace.orderbook && supportedOrderbooks.includes(marketplace.orderbook)
             );
 
             if (exchange.enabled) {
               let operators: string[] = [];
 
-              const seaportV15Operators = [Sdk.SeaportV15.Addresses.Exchange[config.chainId]];
-              if (Sdk.SeaportBase.Addresses.OpenseaConduitKey[config.chainId]) {
-                seaportV15Operators.push(
-                  new Sdk.SeaportBase.ConduitController(config.chainId).deriveConduit(
-                    Sdk.SeaportBase.Addresses.OpenseaConduitKey[config.chainId]
-                  )
-                );
-              }
-
-              const seaportV16Operators = [Sdk.SeaportV16.Addresses.Exchange[config.chainId]];
-              if (Sdk.SeaportBase.Addresses.OpenseaConduitKey[config.chainId]) {
-                seaportV16Operators.push(
-                  new Sdk.SeaportBase.ConduitController(config.chainId).deriveConduit(
-                    Sdk.SeaportBase.Addresses.OpenseaConduitKey[config.chainId]
-                  )
-                );
-              }
+              const openseaConduit = new Sdk.SeaportBase.ConduitController(
+                config.chainId
+              ).deriveConduit(Sdk.SeaportBase.Addresses.OpenseaConduitKey[config.chainId]);
 
               switch (exchange.orderKind) {
                 case "blur": {
@@ -508,12 +489,12 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
                 }
 
                 case "seaport-v1.5": {
-                  operators = seaportV15Operators;
+                  operators = [Sdk.SeaportV15.Addresses.Exchange[config.chainId], openseaConduit];
                   break;
                 }
 
                 case "seaport-v1.6": {
-                  operators = seaportV16Operators;
+                  operators = [Sdk.SeaportV16.Addresses.Exchange[config.chainId], openseaConduit];
                   break;
                 }
 
@@ -546,15 +527,27 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
                 }
               }
 
-              const exchangeBlocked = await checkMarketplaceIsFiltered(
-                params.collection,
-                operators
-              );
+              exchange.enabled = !(await checkMarketplaceIsFiltered(contract, operators));
 
-              exchange.enabled = !exchangeBlocked;
+              // Handle OpenSea royalty enforcement
+              const osCustomTransferValidator =
+                Sdk.SeaportBase.Addresses.OpenSeaCustomTransferValidator[config.chainId];
+              const erc721cConfigV2 = await erc721c.v2.getConfigFromDb(contract);
+              if (
+                osCustomTransferValidator &&
+                erc721cConfigV2 &&
+                erc721cConfigV2.transferValidator === osCustomTransferValidator &&
+                exchange.orderKind &&
+                ["seaport-v1.5", "seaport-v1.6"].includes(exchange.orderKind)
+              ) {
+                // When enforcing royalties, only OpenSea seaport orders are available
+                if (marketplace.orderbook !== "opensea") {
+                  exchange.enabled = false;
+                }
+              }
 
               if (exchange.enabled && exchange.orderKind === "payment-processor") {
-                const ppConfig = await paymentProcessor.getConfigByContract(params.collection);
+                const ppConfig = await paymentProcessor.getConfigByContract(contract);
                 if (ppConfig && ppConfig.securityPolicy.enforcePricingConstraints) {
                   exchange.maxPriceRaw = ppConfig?.pricingBounds?.ceilingPrice;
                   exchange.minPriceRaw = ppConfig?.pricingBounds?.floorPrice;
@@ -571,7 +564,7 @@ export const getCollectionMarketplaceConfigurationsV2Options: RouteOptions = {
                   }
                 }
               } else if (exchange.enabled && exchange.orderKind === "payment-processor-v2") {
-                const settings = await paymentProcessorV2.getConfigByContract(params.collection);
+                const settings = await paymentProcessorV2.getConfigByContract(contract);
 
                 let paymentTokens = [Sdk.Common.Addresses.Native[config.chainId]];
                 if (
