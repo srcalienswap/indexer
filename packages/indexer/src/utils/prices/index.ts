@@ -317,7 +317,7 @@ export const getUSDAndNativePrices = async (
     }
 
     const currency = await getCurrency(currencyAddress);
-    if (currency.decimals && currencyUSDPrice) {
+    if (currency.decimals !== undefined && currencyUSDPrice) {
       const currencyUnit = bn(10).pow(currency.decimals);
       usdPrice = bn(price).mul(currencyUSDPrice.value).div(currencyUnit).toString();
       if (nativeUSDPrice) {
