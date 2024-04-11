@@ -374,7 +374,7 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
       mediaUrl: normalizeLink(metadata?.animation_url) || null,
       metadataOriginalUrl: this.parseIPFSURI(metadata.uri),
       attributes: attributes.map((trait: any) => ({
-        key: trait.trait_type ?? "property",
+        key: trait.trait_type || "property",
         value: trait.value,
         kind: typeof trait.value == "number" ? "number" : "string",
         rank: 1,
