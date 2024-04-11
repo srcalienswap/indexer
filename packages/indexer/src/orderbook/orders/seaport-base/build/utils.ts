@@ -1,5 +1,6 @@
 import * as Sdk from "@reservoir0x/sdk";
 import { getSourceHash } from "@reservoir0x/sdk/dist/utils";
+import * as erc721c from "@/utils/erc721c";
 
 import { bn } from "@/common/utils";
 
@@ -40,4 +41,13 @@ export const padSourceToSalt = (salt: string, source?: string) => {
       : getSourceHash(source) + getSourceHash("reservoir.tools");
   const saltPaddedTo32Bytes = bn(salt).toHexString().slice(2).padStart(64, "0");
   return bn(`0x${prefix}${saltPaddedTo32Bytes.slice(prefix.length)}`).toString();
+};
+
+export const isRestrictedByERC721C = async (contract: string) => {
+  const config = await erc721c.v2.getConfigFromDb(contract);
+  // is OpenSea's custom transfer validator
+  if (config && config.transferValidator === "0xa000027a9b2802e1ddf7000061001e5c005a0000") {
+    return true;
+  }
+  return false;
 };
