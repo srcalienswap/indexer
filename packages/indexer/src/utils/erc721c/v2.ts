@@ -47,10 +47,16 @@ const getConfig = async (contract: string): Promise<ERC721CV2Config | undefined>
       .getTransferValidator()
       .then((address: string) => address.toLowerCase());
 
+    const osCustomTransferValidator =
+      Sdk.SeaportBase.Addresses.OpenSeaCustomTransferValidator[config.chainId];
+
     if (transferValidatorAddress === AddressZero) {
       // The collection doesn't use any transfer validator anymore
       await deleteConfig(contract);
-    } else if (transferValidatorAddress === "0xa000027a9b2802e1ddf7000061001e5c005a0000") {
+    } else if (
+      osCustomTransferValidator &&
+      transferValidatorAddress === osCustomTransferValidator
+    ) {
       // The collection uses OpenSea's custom transfer validator
       const slot = keccak256(["uint256", "uint256"], [contract, 2]);
       const rawResult = await baseProvider.getStorageAt(contract, slot);
