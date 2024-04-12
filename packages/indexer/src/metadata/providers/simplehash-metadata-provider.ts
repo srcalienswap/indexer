@@ -198,6 +198,10 @@ export class SimplehashMetadataProvider extends AbstractBaseMetadataProvider {
       return "polygon-mumbai";
     }
 
+    if (network == "amoy") {
+      return "polygon-amoy";
+    }
+
     if (network == "sepolia") {
       return "ethereum-sepolia";
     }

@@ -89,6 +89,9 @@ const getNetworkConfig = (chainId?: number) => {
       case 80001:
         url = "https://polygon-mumbai-bor-rpc.publicnode.com";
         break;
+      case 80002:
+        url = "https://rpc-amoy.polygon.technology";
+        break;
       case 11155111:
         url = "https://1rpc.io/sepolia";
         break;
@@ -203,6 +206,7 @@ const config: HardhatUserConfig = {
     berachainTestnet: getNetworkConfig(80085),
     garnet: getNetworkConfig(17069),
     redstone: getNetworkConfig(690),
+    amoy: getNetworkConfig(80002),
   },
   etherscan: {
     apiKey: {
@@ -238,6 +242,7 @@ const config: HardhatUserConfig = {
       berachainTestnet: "0x",
       garnet: "0x",
       redstone: "0x",
+      amoy: "0x",
     },
     customChains: [
       // Mainnets
@@ -424,6 +429,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.redstone.xyz",
           browserURL: "https://api.explorer.redstonechain.com/",
+        },
+      },
+      {
+        network: "amoy",
+        chainId: 80002,
+        urls: {
+          apiURL: "https://api-amoy.polygonscan.com/api",
+          browserURL: "https://www.oklink.com/amoy",
         },
       },
     ],
