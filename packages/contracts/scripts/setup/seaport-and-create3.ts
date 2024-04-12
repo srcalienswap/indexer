@@ -10,7 +10,7 @@ const INEFFICIENT_IMMUTABLE_CREATE2_FACTORY = "0xcfA3A7637547094fF06246817a35B83
 const IMMUTABLE_CREATE2_FACTORY = "0x0000000000FFe8B47B3e2130213B802212439497";
 
 const CONDUIT_CONTROLLER = "0x00000000F9490004C11Cef243f5400493c00Ad63";
-const SEAPORT_V16 = "0x0000000000000068f116a894984e2db1123eb395";
+const SEAPORT_V16 = "0x0000000000000068F116a894984e2DB1123eB395";
 const CREATE3_FACTORY = "0x0000000000000A9eFE52e741bcB25da0E4438E71";
 
 // Deploy base contracts:
@@ -106,7 +106,7 @@ export const setup = async () => {
   }
 
   {
-    console.log(`6. Deploying Seaport v1.5 to ${SEAPORT_V16.toLowerCase()}`);
+    console.log(`6. Deploying Seaport v1.6 to ${SEAPORT_V16.toLowerCase()}`);
     const code = await provider.getCode(SEAPORT_V16);
     if (code.length > 2) {
       console.log("- contract already deployed");
