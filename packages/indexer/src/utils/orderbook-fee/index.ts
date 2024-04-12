@@ -75,6 +75,12 @@ export const validateOrderbookFee = async (
     bps: number;
   }[]
 ) => {
+  // Make sure the total bps is not out of range.
+  const totalBps = feeBreakdown.reduce((t, b) => t + b.bps, 0);
+  if (totalBps > 10000) {
+    throw new Error("invalid-fee");
+  }
+
   if (FEE_BPS > 0) {
     let foundOrderbookFee = false;
 
