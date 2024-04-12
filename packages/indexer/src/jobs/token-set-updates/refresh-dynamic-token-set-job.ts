@@ -24,9 +24,9 @@ export default class RefreshDynamicTokenSetJob extends AbstractRabbitMqJobHandle
 
     const tokenSetResult = await idb.oneOrNone(
       `
-              SELECT 1 FROM token_sets
-              WHERE token_sets.id = $/id/
-            `,
+        SELECT 1 FROM token_sets
+        WHERE token_sets.id = $/id/
+      `,
       {
         id: tokenSet.id,
       }
