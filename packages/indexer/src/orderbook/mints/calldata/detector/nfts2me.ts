@@ -42,9 +42,9 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
     }
 
     const n2mVersion = version.toString();
-    let mintingType: number | undefined;
 
     let price: string;
+    let mintingType: number | undefined;
     if (bn(n2mVersion).gt(1999)) {
       const [mintFee, protocolFee, merkleRoot, mType] = await Promise.all([
         contract.mintFee(1),
@@ -52,8 +52,9 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
         contract.merkleRoot(),
         contract.mintingType(),
       ]);
-      mintingType = mType;
+
       price = protocolFee.add(mintFee).toString();
+      mintingType = mType;
 
       if (merkleRoot !== HashZero) {
         // Skip allowlist mints for now
@@ -98,7 +99,7 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
         price,
         maxMintsPerWallet: toSafeNumber(maxPerAddress),
       });
-    } else if (mintingType === undefined || mintingType === 0) {
+    } else {
       results.push({
         collection,
         contract: collection,
