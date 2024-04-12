@@ -427,8 +427,8 @@ const config: HardhatUserConfig = {
         network: "redstone",
         chainId: 690,
         urls: {
-          apiURL: "https://explorer.redstone.xyz",
-          browserURL: "https://api.explorer.redstonechain.com/",
+          apiURL: "https://api.explorer.redstonechain.com",
+          browserURL: "https://explorer.redstone.xyz",
         },
       },
       {
