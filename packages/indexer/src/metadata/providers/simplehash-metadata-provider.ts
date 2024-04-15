@@ -109,8 +109,9 @@ export class SimplehashMetadataProvider extends AbstractBaseMetadataProvider {
         "https://ipfs.io/ipfs/bafybeifbpjx5p4c2xh4jd4aixpnayodejskgpk5jsqgc73uvb2hrynqhbm/0.gif";
     }
 
-    if (_.toLower(metadata.contract_address) === "0x5589cC3E514967cde22c772fB02d9261B1F580ae") {
-      imageUrl = imageUrl.replace("?ext=gif", "");
+    if (_.toLower(metadata.contract_address) === "0x5589cc3e514967cde22c772fb02d9261b1f580ae") {
+      imageUrl =
+        "https://ipfs.io/ipfs/bafybeicxlowk5olconjph66yjhxk6humqkxsdolvkeabmjmpya52l5ujay/0.png";
     }
 
     if (
