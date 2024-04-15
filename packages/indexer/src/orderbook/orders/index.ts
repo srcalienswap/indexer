@@ -1133,10 +1133,17 @@ export const checkBlacklistAndFallback = async (
         Sdk.SeaportV15.Addresses.Exchange[config.chainId],
         openseaConduit,
       ]),
-      checkMarketplaceIsFiltered(collection, [
-        Sdk.SeaportV16.Addresses.Exchange[config.chainId],
-        openseaConduit,
-      ]),
+      (async () => {
+        // Seaport 1.6 is not deployed on all chains we support at the moment
+        if (!Sdk.SeaportV16.Addresses.Exchange[config.chainId]) {
+          return true;
+        }
+
+        return checkMarketplaceIsFiltered(collection, [
+          Sdk.SeaportV16.Addresses.Exchange[config.chainId],
+          openseaConduit,
+        ]);
+      })(),
     ]);
 
     // Fallback to Seaport v1.6 when Seaport v1.5 is blocked
