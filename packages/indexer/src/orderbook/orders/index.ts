@@ -1128,12 +1128,7 @@ export const checkBlacklistAndFallback = async (
       Sdk.SeaportBase.Addresses.OpenseaConduitKey[config.chainId] ?? HashZero
     );
 
-    const [
-      seaportV15IsBlocked,
-      seaportV16IsBlocked,
-      paymentProcessorIsBlocked,
-      paymentProcessorV2IsBlocked,
-    ] = await Promise.all([
+    const [seaportV15IsBlocked, seaportV16IsBlocked] = await Promise.all([
       checkMarketplaceIsFiltered(collection, [
         Sdk.SeaportV15.Addresses.Exchange[config.chainId],
         openseaConduit,
@@ -1141,12 +1136,6 @@ export const checkBlacklistAndFallback = async (
       checkMarketplaceIsFiltered(collection, [
         Sdk.SeaportV16.Addresses.Exchange[config.chainId],
         openseaConduit,
-      ]),
-      checkMarketplaceIsFiltered(collection, [
-        Sdk.PaymentProcessor.Addresses.Exchange[config.chainId],
-      ]),
-      checkMarketplaceIsFiltered(collection, [
-        Sdk.PaymentProcessorV2.Addresses.Exchange[config.chainId],
       ]),
     ]);
 
@@ -1161,19 +1150,29 @@ export const checkBlacklistAndFallback = async (
     }
 
     // Fallback to PaymentProcessor v2 when PaymentProcessor is blocked
-    if (params.orderKind === "payment-processor" && paymentProcessorIsBlocked) {
-      params.orderKind = "payment-processor-v2";
+    if (params.orderKind === "payment-processor") {
+      const paymentProcessorIsBlocked = await checkMarketplaceIsFiltered(collection, [
+        Sdk.PaymentProcessor.Addresses.Exchange[config.chainId],
+      ]);
+      if (paymentProcessorIsBlocked) {
+        params.orderKind = "payment-processor-v2";
+      }
     }
 
     // Fallback to Seaport when PaymentProcessor v2 is blocked
-    if (params.orderKind === "payment-processor-v2" && paymentProcessorV2IsBlocked) {
-      if (!seaportV15IsBlocked) {
-        params.orderKind = "seaport-v1.5";
-      } else if (!seaportV16IsBlocked) {
-        params.orderKind = "seaport-v1.6";
-      } else {
-        await redis.set(cacheKey, errorMsg, "EX", cacheDuration);
-        throw new Error(errorMsg);
+    if (params.orderKind === "payment-processor-v2") {
+      const paymentProcessorV2IsBlocked = await checkMarketplaceIsFiltered(collection, [
+        Sdk.PaymentProcessorV2.Addresses.Exchange[config.chainId],
+      ]);
+      if (paymentProcessorV2IsBlocked) {
+        if (!seaportV15IsBlocked) {
+          params.orderKind = "seaport-v1.5";
+        } else if (!seaportV16IsBlocked) {
+          params.orderKind = "seaport-v1.6";
+        } else {
+          await redis.set(cacheKey, errorMsg, "EX", cacheDuration);
+          throw new Error(errorMsg);
+        }
       }
     }
 
