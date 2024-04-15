@@ -35,6 +35,7 @@ import { BidDetails, ListingDetails } from "@reservoir0x/sdk/dist/router/v6/type
 
 import { inject } from "@/api/index";
 import { idb } from "@/common/db";
+import { redis } from "@/common/redis";
 import { config } from "@/config/index";
 import { Sources } from "@/models/sources";
 import { SourcesEntity } from "@/models/sources/sources-entity";
@@ -1110,7 +1111,19 @@ export const checkBlacklistAndFallback = async (
     orderbook: string;
   }
 ) => {
-  if (params.orderbook === "reservoir") {
+  const errorMsg = "Collection is blocking all supported exchanges";
+
+  const cacheKey = `fallback:${collection}:${params.orderKind}`;
+  const cacheDuration = 30 * 60;
+
+  const cache = await redis.get(cacheKey);
+  if (cache) {
+    if (cache === errorMsg) {
+      throw new Error(errorMsg);
+    } else {
+      params.orderKind = cache as OrderKind;
+    }
+  } else if (params.orderbook === "reservoir") {
     const openseaConduit = new Sdk.SeaportV15.Exchange(config.chainId).deriveConduit(
       Sdk.SeaportBase.Addresses.OpenseaConduitKey[config.chainId] ?? HashZero
     );
@@ -1159,8 +1172,11 @@ export const checkBlacklistAndFallback = async (
       } else if (!seaportV16IsBlocked) {
         params.orderKind = "seaport-v1.6";
       } else {
-        throw new Error("Collection is blocking all supported exchanges");
+        await redis.set(cacheKey, errorMsg, "EX", cacheDuration);
+        throw new Error(errorMsg);
       }
     }
+
+    await redis.set(cacheKey, params.orderKind, "EX", cacheDuration);
   }
 };
