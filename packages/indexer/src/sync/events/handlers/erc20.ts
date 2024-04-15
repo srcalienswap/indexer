@@ -1,5 +1,3 @@
-import { AddressZero } from "@ethersproject/constants";
-
 import { getEventData } from "@/events-sync/data";
 import { EnhancedEvent, OnChainData } from "@/events-sync/handlers/utils";
 
