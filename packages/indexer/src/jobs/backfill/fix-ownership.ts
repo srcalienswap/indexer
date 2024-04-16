@@ -140,20 +140,37 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
   }
 
   public async updateErc1155OwnerBalance(owner: string, contract: string, tokenId: string) {
-    const ownerQuery = `
-      SELECT SUM(CASE WHEN nte.to = $/owner/ THEN nte.amount ELSE -nte.amount END) AS "amount"
+    const ownerReceivedQuery = `
+      SELECT SUM(nte.amount) AS "amount"
       FROM nft_transfer_events nte
       WHERE address = $/contract/
       AND token_id = $/tokenId/
-      AND (nte.from = $/owner/ OR nte.to = $/owner/)
+      AND nte.to = $/owner/
       AND is_deleted = 0
     `;
 
-    const ownerBalance = await ridb.oneOrNone(ownerQuery, {
+    const ownerReceived = await ridb.oneOrNone(ownerReceivedQuery, {
       owner: toBuffer(owner),
       contract: toBuffer(contract),
       tokenId: tokenId,
     });
+
+    const ownerSentQuery = `
+      SELECT SUM(nte.amount) AS "amount"
+      FROM nft_transfer_events nte
+      WHERE address = $/contract/
+      AND token_id = $/tokenId/
+      AND nte.from = $/owner/
+      AND is_deleted = 0
+    `;
+
+    const ownerSent = await ridb.oneOrNone(ownerSentQuery, {
+      owner: toBuffer(owner),
+      contract: toBuffer(contract),
+      tokenId: tokenId,
+    });
+
+    const currentBalance = _.max([ownerReceived.amount - ownerSent.amount, 0]);
 
     const updateOwnersQuery = `
       UPDATE nft_balances
@@ -168,13 +185,13 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
       owner: toBuffer(owner),
       contract: toBuffer(contract),
       tokenId: tokenId,
-      balance: ownerBalance.amount,
+      balance: currentBalance,
     });
 
     if (rowCount > 0) {
       logger.info(
         this.queueName,
-        `Updated owner ${owner} balance to ${ownerBalance.amount} for ${contract}:${tokenId}`
+        `Updated owner ${owner} balance to ${currentBalance} for ${contract}:${tokenId}`
       );
 
       const collection = await Collections.getByContractAndTokenId(contract, Number(tokenId));
