@@ -10,7 +10,7 @@ import { ethers } from "hardhat";
 
 import { DeploymentHelper, getGasConfigs } from "./deployment-helper";
 
-export const DEPLOYER = "0xf3d63166F0Ca56C3c1A3508FcE03Ff0Cf3Fb691e";
+export const DEPLOYER = "0xA34f0891c5DcfD524BcB0e9f38dEfEB40E0198C0";
 const DEPLOYMENTS_FILE = "deployments.json";
 
 export const readDeployment = async (

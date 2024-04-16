@@ -11,10 +11,9 @@ import { Network } from "@reservoir0x/sdk/src/utils";
 import hre, { ethers } from "hardhat";
 
 export const getGasConfigs = (chainId: number) => {
-  if (
-    [Network.Zora, Network.ZoraTestnet, Network.Ancient8Testnet, Network.Ancient8].includes(chainId)
-  ) {
+  if ([Network.Zora, Network.Ancient8Testnet, Network.Ancient8, Network.ZkLinkGoerli].includes(chainId)) {
     return {
+      gasLimit: "3000000",
       maxFeePerGas: "2000000000",
       maxPriorityFeePerGas: "500000000",
     };
@@ -46,7 +45,7 @@ export class DeploymentHelper {
     const chainId = await deployer.getChainId();
 
     // Default: https://github.com/lifinance/create3-factory
-    let create3FactoryAddress = "0x93FEC2C00BfE902F733B57c5a6CeeD7CD1384AE1";
+    let create3FactoryAddress = "0x7c846777e07191fc9a9eee55dc5ebb70915c750f";
     const code = await ethers.provider.getCode(create3FactoryAddress);
     if (!code || code === "0x") {
       create3FactoryAddress = Sdk.Common.Addresses.Create3Factory[chainId];
@@ -83,7 +82,7 @@ export class DeploymentHelper {
       .getContractFactory(contractName, this.deployer)
       .then((factory) => factory.getDeployTransaction(...args).data);
 
-    await create3Factory.deploy(salt, creationCode, getGasConfigs(this.chainId));
+    await create3Factory.deploy(salt, creationCode, getGasConfigs(this.chainId))
 
     const deploymentAddress: string = await create3Factory.getDeployed(
       await this.deployer.getAddress(),

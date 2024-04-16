@@ -38,3 +38,8 @@ The [Reservoir router](../contracts/contracts/router/ReservoirV6_0_1.sol) is a s
 One of the main goals of the router is to be completely stateless, holding no funds and requiring no approvals on the router/module contracts (in order to reduce the risk surface and allow easy upgradeability). This means that the risk is limited to a per-transaction basis (eg. making sure no funds get lost as part of filling through the router) rather than globally (eg. funds that can be stolen from the router). Due to this, filling orders that require anything other than ETH can be tricky (since ERC20/ERC721/ERC1155 all require approvals to be able to transfer on someone's behalf). We overcome this via two methods:
 
 - When executing anything that requires the approval of a single ERC721/ERC1155 token id, we use the `onERC721Received` and `onERC1155Received` hooks to transfer the NFT to the corresponding module contract and then make any other needed calls.
+
+
+```
+npx hardhat run scripts/setup/zklink-goerli-one-off.ts --network zkLinkGoerli 
+```

@@ -9,10 +9,11 @@ const main = async () => {
   const chainId = await ethers.provider.getNetwork().then((n) => n.chainId);
 
   // Make sure the current signer is the canonical deployer
-  const [deployer] = await ethers.getSigners();
-  if (deployer.address.toLowerCase() !== DEPLOYER.toLowerCase()) {
-    throw new Error("Wrong deployer");
-  }
+  // const [deployer] = await ethers.getSigners();
+  // if (deployer.address.toLowerCase() !== DEPLOYER.toLowerCase()) {
+  //   throw new Error("Wrong deployer");
+  // }
+  await trigger.Modules.AlienswapModule(chainId)
 };
 
 main()

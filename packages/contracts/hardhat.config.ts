@@ -1,7 +1,7 @@
 import { config as dotEnvConfig } from "dotenv";
 dotEnvConfig();
 
-import { HardhatUserConfig } from "hardhat/types";
+import { HardhatUserConfig } from "hardhat/config";
 
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
@@ -12,6 +12,11 @@ import "hardhat-tracer";
 // For zkSync
 import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
+
+//for clash proxy users. (Mainland China users need to bypass the GFW to visit etherscan.io)
+import { ProxyAgent, setGlobalDispatcher } from "undici";
+const proxyAgent: ProxyAgent = new ProxyAgent("http://127.0.0.1:7890");
+setGlobalDispatcher(proxyAgent);
 
 const getNetworkConfig = (chainId?: number) => {
   if (!chainId) {
@@ -83,9 +88,6 @@ const getNetworkConfig = (chainId?: number) => {
       case 5:
         url = "https://goerli.blockpi.network/v1/rpc/public";
         break;
-      case 999:
-        url = "https://testnet.rpc.zora.co";
-        break;
       case 5001:
         url = "https://rpc.testnet.mantle.xyz";
         break;
@@ -94,9 +96,6 @@ const getNetworkConfig = (chainId?: number) => {
         break;
       case 80001:
         url = "https://rpc-mumbai.maticvigil.com";
-        break;
-      case 84531:
-        url = "https://goerli.base.org";
         break;
       case 11155111:
         url = "https://1rpc.io/sepolia";
@@ -111,8 +110,8 @@ const getNetworkConfig = (chainId?: number) => {
         url = "https://sepolia.blast.io";
         break;
       case 810182:
-          url = "https://goerli.rpc.zklink.io";
-          break;
+        url = "https://goerli.rpc.zklink.io";
+        break;
       default:
         throw new Error("Unsupported chain id");
     }
@@ -131,6 +130,12 @@ const getNetworkConfig = (chainId?: number) => {
       ethNetwork: "mainnet",
       zksync: true,
     };
+  } else if (chainId === 810182) { // zkLinkGoerli
+    return {
+      ...config,
+      ethNetwork: "goerli",
+      zksync: true,
+    };
   }
 
   return config;
@@ -138,6 +143,20 @@ const getNetworkConfig = (chainId?: number) => {
 
 const networkConfig = getNetworkConfig();
 const config: HardhatUserConfig = {
+  zksolc: {
+    version: "1.3.23",
+    // settings: {
+    //   libraries: {
+    //     "ExecutionHelper/contracts/ExecutionHelper.sol": {
+    //       ExecutionHelper: readContractAddressFromFile(
+    //         "./ExecutionHelper/.executionHelper.address"
+    //       ),
+    //     },
+    //   },
+    //   // find all available options in the official documentation
+    //   // https://era.zksync.io/docs/tools/hardhat/hardhat-zksync-solc.html#configuration
+    // },
+  },
   solidity: {
     compilers: [
       {
@@ -152,6 +171,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  defaultNetwork: "zkLinkGoerli",
   networks: {
     // Devnets
     hardhat: {
@@ -190,18 +210,16 @@ const config: HardhatUserConfig = {
     apex: getNetworkConfig(70700),
     blast: getNetworkConfig(81457),
     // Testnets
-    zklinkTestnet: getNetworkConfig(810182),
     goerli: getNetworkConfig(5),
-    zoraTestnet: getNetworkConfig(999),
     mantleTestnet: getNetworkConfig(5001),
     lineaTestnet: getNetworkConfig(59140),
     mumbai: getNetworkConfig(80001),
-    baseGoerli: getNetworkConfig(84531),
     sepolia: getNetworkConfig(11155111),
     frameTestnet: getNetworkConfig(68840142),
     ancient8Testnet: getNetworkConfig(28122024),
     baseSepolia: getNetworkConfig(84532),
     blastSepolia: getNetworkConfig(168587773),
+    zkLinkGoerli: getNetworkConfig(810182)
   },
   etherscan: {
     apiKey: {
@@ -225,13 +243,10 @@ const config: HardhatUserConfig = {
       apex: "0x",
       blast: process.env.ETHERSCAN_API_KEY_BLAST ?? "",
       // Testnets
-      zklinkTestnet: "0x",
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI ?? "",
-      zoraTestnet: "0x",
       mantleTestnet: "0x",
       lineaTestnet: process.env.ETHERSCAN_API_KEY_LINEA_TESTNET ?? "",
       mumbai: process.env.ETHERSCAN_API_KEY_MUMBAI ?? "",
-      baseGoerli: process.env.ETHERSCAN_API_KEY_BASE_GOERLI ?? "",
       sepolia: process.env.ETHERSCAN_API_KEY_SEPOLIA ?? "",
       frameTestnet: "0x",
       ancient8Testnet: "0x",
@@ -346,14 +361,6 @@ const config: HardhatUserConfig = {
       },
       // Testnets
       {
-        network: "zoraTestnet",
-        chainId: 999,
-        urls: {
-          apiURL: "https://testnet.explorer.zora.energy/api",
-          browserURL: "https://testnet.explorer.zora.energy",
-        },
-      },
-      {
         network: "mantleTestnet",
         chainId: 5001,
         urls: {
@@ -375,14 +382,6 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-mumbai.polygonscan.com/api",
           browserURL: "https://mumbai.polygonscan.com",
-        },
-      },
-      {
-        network: "baseGoerli",
-        chainId: 84531,
-        urls: {
-          apiURL: "https://api-goerli.basescan.org/api",
-          browserURL: "https://goerli.basescan.org",
         },
       },
       // This isn't working, couldn't find any valid API for their explorer
@@ -416,14 +415,6 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://testnet.blastscan.io/api",
           browserURL: "https://testnet.blastscan.io/",
-        },
-      },
-      {
-        network: "zklinkTestnet",
-        chainId: 810182,
-        urls: {
-          apiURL: "https://goerli.rpc.zklink.io/api",
-          browserURL: "https://goerli.explorer.zklink.io",
         },
       },
     ],
