@@ -141,7 +141,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
 
   public async updateErc1155OwnerBalance(owner: string, contract: string, tokenId: string) {
     const ownerReceivedQuery = `
-      SELECT SUM(nte.amount) AS "amount"
+      SELECT COALESCE(SUM(nte.amount), 0) AS "amount"
       FROM nft_transfer_events nte
       WHERE address = $/contract/
       AND token_id = $/tokenId/
@@ -156,7 +156,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
     });
 
     const ownerSentQuery = `
-      SELECT SUM(nte.amount) AS "amount"
+      SELECT COALESCE(SUM(nte.amount), 0) AS "amount"
       FROM nft_transfer_events nte
       WHERE address = $/contract/
       AND token_id = $/tokenId/
