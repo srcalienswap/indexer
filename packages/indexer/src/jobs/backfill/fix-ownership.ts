@@ -5,8 +5,6 @@ import { RabbitMQMessage } from "@/common/rabbit-mq";
 import _ from "lodash";
 import { fromBuffer, toBuffer } from "@/common/utils";
 import { logger } from "@/common/logger";
-import { config } from "@/config/index";
-import { redlock } from "@/common/redis";
 import { resyncUserCollectionsJob } from "@/jobs/nft-balance-updates/reynsc-user-collections-job";
 import { Collections } from "@/models/collections";
 import { AddressZero } from "@ethersproject/constants";
@@ -25,24 +23,25 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
 
   public async process(payload: FixOwnershipJobCursorInfo) {
     const { timestamp } = payload;
+    const syncUpToTimestamp = 1712078923;
     const limit = 200;
     let cursor = "";
 
     if (timestamp) {
-      cursor = `AND timestamp < '${timestamp}'`;
+      cursor = `AND timestamp < $/timestamp/`;
     }
 
     const query = `
       SELECT nft_transfer_events.*, c.kind AS "contract_kind"
       FROM nft_transfer_events
       JOIN contracts c ON nft_transfer_events.address = c.address
-      WHERE timestamp > 1712078923
+      WHERE timestamp > $/syncUpToTimestamp/
       ${cursor}
       ORDER BY timestamp DESC, tx_index DESC, log_index DESC
       LIMIT ${limit}
   `;
 
-    const transfers = await ridb.manyOrNone(query);
+    const transfers = await ridb.manyOrNone(query, { syncUpToTimestamp, timestamp });
 
     for (const transfer of transfers) {
       if (transfer.contract_kind === "erc721") {
@@ -209,14 +208,3 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
 }
 
 export const fixOwnershipJob = new FixOwnershipJob();
-
-if (config.chainId === 8453) {
-  redlock
-    .acquire([fixOwnershipJob.getQueue()], 60 * 60 * 24 * 30 * 1000)
-    .then(async () => {
-      await fixOwnershipJob.addToQueue();
-    })
-    .catch(() => {
-      // Skip on any errors
-    });
-}
