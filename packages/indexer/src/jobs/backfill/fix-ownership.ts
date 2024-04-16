@@ -104,7 +104,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
               }
             }
           }
-        } else if (owners && Number(owners[0].amount) > 1) {
+        } else if (owners.length && Number(owners[0].amount) > 1) {
           logger.info(
             this.queueName,
             `Owner ${fromBuffer(owners[0].amount)} for ${fromBuffer(transfer.address)}:${
