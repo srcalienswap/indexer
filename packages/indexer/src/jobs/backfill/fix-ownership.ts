@@ -10,6 +10,7 @@ import { Collections } from "@/models/collections";
 import { AddressZero } from "@ethersproject/constants";
 
 export type FixOwnershipJobCursorInfo = {
+  syncUpToTimestamp: number;
   timestamp?: number;
 };
 
@@ -22,8 +23,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
   singleActiveConsumer = true;
 
   public async process(payload: FixOwnershipJobCursorInfo) {
-    const { timestamp } = payload;
-    const syncUpToTimestamp = 1712078923;
+    const { syncUpToTimestamp, timestamp } = payload;
     const limit = 200;
     let cursor = "";
 
@@ -132,7 +132,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
 
       return {
         addToQueue: true,
-        cursor: { timestamp: lastItem.timestamp },
+        cursor: { syncUpToTimestamp, timestamp: lastItem.timestamp },
       };
     }
 
