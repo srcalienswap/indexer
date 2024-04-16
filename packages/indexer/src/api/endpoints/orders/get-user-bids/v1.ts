@@ -43,6 +43,11 @@ export const getUserBidsV1Options: RouteOptions = {
         .description(
           "activeª^º = currently valid\ninactiveª^ = temporarily invalid\nvalid^ = both active and inactive orders"
         ),
+      collection: Joi.string()
+        .lowercase()
+        .description(
+          "Filter to a particular collection bids with collection-id. Example: `0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63`"
+        ),
       sortBy: Joi.string()
         .valid("createdAt", "price")
         .default("createdAt")
@@ -189,6 +194,30 @@ export const getUserBidsV1Options: RouteOptions = {
         `orders.side = 'buy'`,
         orderStatusFilter,
       ];
+
+      if (query.collection) {
+        const [contract] = query.collection.split(":");
+
+        (query as any).contract = toBuffer(contract);
+        conditions.push(`orders.contract = $/contract/`);
+
+        if (!query.collection.match(regex.address)) {
+          baseQuery += `
+            JOIN LATERAL (
+              SELECT
+                contract,
+                token_id
+              FROM
+                token_sets_tokens
+              WHERE
+                token_sets_tokens.token_set_id = orders.token_set_id LIMIT 1) tst ON TRUE
+            JOIN tokens ON tokens.contract = tst.contract
+              AND tokens.token_id = tst.token_id
+          `;
+
+          conditions.push(`tokens.collection_id = $/collection/`);
+        }
+      }
 
       switch (query.type) {
         case "token": {
