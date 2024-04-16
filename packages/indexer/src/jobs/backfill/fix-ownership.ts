@@ -8,6 +8,7 @@ import { logger } from "@/common/logger";
 import { resyncUserCollectionsJob } from "@/jobs/nft-balance-updates/reynsc-user-collections-job";
 import { Collections } from "@/models/collections";
 import { AddressZero } from "@ethersproject/constants";
+import { fromUnixTime } from "date-fns";
 
 export type FixOwnershipJobCursorInfo = {
   syncUpToTimestamp: number;
@@ -63,7 +64,9 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
             this.queueName,
             `Multiple owners found for ${fromBuffer(transfer.address)}:${
               transfer.token_id
-            } current owner ${fromBuffer(transfer.to)}`
+            } current owner ${fromBuffer(transfer.to)} reached ${
+              timestamp ? fromUnixTime(timestamp).toISOString() : ""
+            }`
           );
 
           for (const owner of owners) {
