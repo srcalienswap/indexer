@@ -104,6 +104,27 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
               }
             }
           }
+        } else if (owners && Number(owners[0].amount) > 1) {
+          logger.info(
+            this.queueName,
+            `Owner ${fromBuffer(owners[0].amount)} for ${fromBuffer(transfer.address)}:${
+              transfer.token_id
+            } has ${owners[0].amount} setting to 1`
+          );
+
+          const updateOwnersQuery = `
+            UPDATE nft_balances
+            SET amount = 1, updated_at = NOW()
+            WHERE owner = $/owner/
+            AND contract = $/contract/
+            AND token_id = $/tokenId/
+          `;
+
+          await idb.none(updateOwnersQuery, {
+            owner: owners[0].owner,
+            contract: transfer.address,
+            tokenId: transfer.token_id,
+          });
         }
       } else if (transfer.contract_kind === "erc1155") {
         // If not zero address update the balance
