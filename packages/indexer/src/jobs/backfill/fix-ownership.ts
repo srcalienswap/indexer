@@ -9,6 +9,7 @@ import { resyncUserCollectionsJob } from "@/jobs/nft-balance-updates/reynsc-user
 import { Collections } from "@/models/collections";
 import { AddressZero } from "@ethersproject/constants";
 import { fromUnixTime } from "date-fns";
+import { config } from "@/config/index";
 
 export type FixOwnershipJobCursorInfo = {
   syncUpToTimestamp: number;
@@ -200,7 +201,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
             }
           }
         }
-      } else if (transfer.contract_kind === "erc1155") {
+      } else if (config.chainId !== 70700 && transfer.contract_kind === "erc1155") {
         // If not zero address update the balance
         if (
           ![AddressZero, "0x000000000000000000000000000000000000dead"].includes(
