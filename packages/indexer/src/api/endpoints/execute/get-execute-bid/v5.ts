@@ -761,10 +761,10 @@ export const getExecuteBidV5Options: RouteOptions = {
               : bn(params.weiPrice).mul(params.quantity ?? 1);
 
             // Check the maker's balance
-            let openOrderRequiredBalance = bn(0);
+            let openBidsRequiredBalance = bn(0);
 
             if (params.collectionBidBalanceCheck) {
-              // Get all the open orders' balance that required
+              // Get all the open bids' balance that required
               const result = await redb.oneOrNone(
                 `
                   SELECT
@@ -773,6 +773,7 @@ export const getExecuteBidV5Options: RouteOptions = {
                   WHERE orders.maker = $/maker/
                   AND orders.fillability_status = 'fillable'
                   AND orders.currency = $/currency/
+                  AND orders.side = 'buy'
                 `,
                 {
                   maker: toBuffer(maker.toLowerCase()),
@@ -780,7 +781,7 @@ export const getExecuteBidV5Options: RouteOptions = {
                 }
               );
               if (result?.total_currency_price) {
-                openOrderRequiredBalance = bn(result.total_currency_price);
+                openBidsRequiredBalance = bn(result.total_currency_price);
               }
             }
 
@@ -790,10 +791,10 @@ export const getExecuteBidV5Options: RouteOptions = {
               if ([WNATIVE, BETH].includes(params.currency)) {
                 const ethBalance = await baseProvider.getBalance(maker);
                 if (
-                  bn(currencyBalance).add(ethBalance).sub(openOrderRequiredBalance).lt(totalPrice)
+                  bn(currencyBalance).add(ethBalance).sub(openBidsRequiredBalance).lt(totalPrice)
                 ) {
                   return errors.push({
-                    message: `Maker does not have sufficient balance currencyBalance=${currencyBalance.toString()}, ethBalance=${ethBalance.toString()}, totalPrice=${totalPrice.toString()}, openOrderRequiredBalance=${openOrderRequiredBalance.toString()}`,
+                    message: `Maker does not have sufficient balance currencyBalance=${currencyBalance.toString()}, ethBalance=${ethBalance.toString()}, totalPrice=${totalPrice.toString()}, openBidsRequiredBalance=${openBidsRequiredBalance.toString()}`,
                     orderIndex: i,
                   });
                 } else {
