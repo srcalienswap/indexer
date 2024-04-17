@@ -70,7 +70,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
             this.queueName,
             `Multiple owners found for ${fromBuffer(transfer.address)}:${
               transfer.token_id
-            } current owner ${currentOwner} reached ${transfer.created_at} timestamp ${
+            } current owner ${currentOwner} reached ${transfer.created_at.toISOString()} timestamp ${
               timestamp ? fromUnixTime(timestamp).toISOString() : ""
             }`
           );
