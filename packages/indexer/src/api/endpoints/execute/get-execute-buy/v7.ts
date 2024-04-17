@@ -2233,17 +2233,6 @@ export const getExecuteBuyV7Options: RouteOptions = {
           blurAuth,
           conduitKey,
           onError: async (kind, error, data) => {
-            logger.error(
-              `get-execute-buy-${version}-handler`,
-              JSON.stringify({
-                request: payload,
-                type: "fillListingsTx.onError",
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                stack: (error as any).stack,
-                message: error.message,
-                apiKey,
-              })
-            );
             errors.push({
               orderId: data.orderId,
               message: error.response?.data ? JSON.stringify(error.response.data) : error.message,
