@@ -142,26 +142,42 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
             transfer.token_id
           );
 
-          const updateOwnersQuery = `
-            UPDATE nft_balances
-            SET owner = $/currentOwner/, updated_at = NOW()
-            WHERE contract = $/contract/
-            AND token_id = $/tokenId/
-            AND owner != $/currentOwner/
-          `;
+          if (fromBuffer(owners[0].owner) !== currentOwner) {
+            const updateCurrentOwner = `
+              UPDATE nft_balances
+              SET amount = 1, updated_at = NOW()
+              WHERE owner = $/owner/
+              AND contract = $/contract/
+              AND token_id = $/tokenId/
+              AND amount != 1
+            `;
 
-          const { rowCount } = await idb.result(updateOwnersQuery, {
-            currentOwner: toBuffer(currentOwner),
-            contract: transfer.address,
-            tokenId: transfer.token_id,
-          });
+            await idb.none(updateCurrentOwner, {
+              owner: toBuffer(currentOwner),
+              contract: transfer.address,
+              tokenId: transfer.token_id,
+            });
 
-          if (rowCount > 0) {
+            const updateOldOwner = `
+              UPDATE nft_balances
+              SET amount = 0, updated_at = NOW()
+              WHERE owner = $/owner/
+              AND contract = $/contract/
+              AND token_id = $/tokenId/
+              AND amount != 0
+            `;
+
+            await idb.none(updateOldOwner, {
+              owner: owners[0].owner,
+              contract: transfer.address,
+              tokenId: transfer.token_id,
+            });
+
             logger.info(
               this.queueName,
-              `Updated wrong owner to ${currentOwner} on ${fromBuffer(transfer.address)}:${
-                transfer.token_id
-              }`
+              `Updated wrong owner to ${currentOwner} from ${fromBuffer(
+                owners[0].owner
+              )} on ${fromBuffer(transfer.address)}:${transfer.token_id}`
             );
 
             const collection = await Collections.getByContractAndTokenId(
@@ -171,6 +187,10 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
 
             if (collection) {
               await resyncUserCollectionsJob.addToQueue([
+                {
+                  user: fromBuffer(owners[0].owner),
+                  collectionId: collection.id,
+                },
                 {
                   user: currentOwner,
                   collectionId: collection.id,
