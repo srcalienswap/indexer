@@ -214,7 +214,8 @@ export const AlienswapModule: ChainIdToAddress = {
   [Network.Arbitrum]: "0x670ec3e840816c81fb8567c9a5368ab55f3d796a",
   [Network.Optimism]: "0x670ec3e840816c81fb8567c9a5368ab55f3d796a",
   [Network.Scroll]: "0xf769c98b6e384e98e36d6fc3ec7247dd1e887f57",
-  [Network.Zklink]: "0xeb9c8b66cab4361801b43eeb1a090f0a3ccd1f5d",
+  // [Network.Zklink]: "0xeb9c8b66cab4361801b43eeb1a090f0a3ccd1f5d",
+  [Network.Zklink]: "0x128adcd896f1982862da3ce5977bd5152447cb02",
 };
 
 export const SudoswapModule: ChainIdToAddress = {
