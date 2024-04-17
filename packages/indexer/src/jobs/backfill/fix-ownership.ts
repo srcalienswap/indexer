@@ -131,7 +131,11 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
         }
       } else if (transfer.contract_kind === "erc1155") {
         // If not zero address update the balance
-        if (fromBuffer(transfer.to) !== AddressZero) {
+        if (
+          ![AddressZero, "0x000000000000000000000000000000000000dead"].includes(
+            fromBuffer(transfer.to)
+          )
+        ) {
           await this.updateErc1155OwnerBalance(
             fromBuffer(transfer.to),
             fromBuffer(transfer.address),
@@ -140,7 +144,11 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
         }
 
         // If not zero address update the balance
-        if (fromBuffer(transfer.from) !== AddressZero) {
+        if (
+          ![AddressZero, "0x000000000000000000000000000000000000dead"].includes(
+            fromBuffer(transfer.from)
+          )
+        ) {
           await this.updateErc1155OwnerBalance(
             fromBuffer(transfer.from),
             fromBuffer(transfer.address),
