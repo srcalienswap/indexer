@@ -236,7 +236,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
 
       return {
         addToQueue: true,
-        cursor: { syncUpToTimestamp, timestamp: lastItem.timestamp },
+        cursor: { syncUpToTimestamp, timestamp: lastItem.timestamp, disableErc1155 },
       };
     }
 
