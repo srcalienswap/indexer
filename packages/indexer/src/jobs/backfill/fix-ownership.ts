@@ -37,6 +37,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
       FROM nft_transfer_events
       JOIN contracts c ON nft_transfer_events.address = c.address
       WHERE timestamp > $/syncUpToTimestamp/
+      AND is_deleted = 0
       ${cursor}
       ORDER BY timestamp DESC, tx_index DESC, log_index DESC
       LIMIT ${limit}
@@ -247,6 +248,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
       FROM nft_transfer_events
       WHERE address = $/contract/
       AND token_id = $/tokenId/
+      AND is_deleted = 0
       ORDER BY timestamp DESC, tx_index DESC, log_index DESC
       LIMIT 1
     `;
