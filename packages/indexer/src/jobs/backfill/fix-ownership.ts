@@ -40,7 +40,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
       ${cursor}
       ORDER BY timestamp DESC, tx_index DESC, log_index DESC
       LIMIT ${limit}
-  `;
+    `;
 
     const transfers = await ridb.manyOrNone(query, { syncUpToTimestamp, timestamp });
 
@@ -60,17 +60,23 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
         });
 
         if (owners.length > 1) {
+          // Fix multiple owners
+          const currentOwner = await this.getErc721CurrentOwner(
+            fromBuffer(transfer.address),
+            transfer.token_id
+          );
+
           logger.info(
             this.queueName,
             `Multiple owners found for ${fromBuffer(transfer.address)}:${
               transfer.token_id
-            } current owner ${fromBuffer(transfer.to)} reached ${
+            } current owner ${currentOwner} reached ${transfer.created_at} timestamp ${
               timestamp ? fromUnixTime(timestamp).toISOString() : ""
             }`
           );
 
           for (const owner of owners) {
-            if (fromBuffer(owner.owner) !== fromBuffer(transfer.to)) {
+            if (fromBuffer(owner.owner) !== currentOwner) {
               logger.info(
                 this.queueName,
                 `Remove owner ${fromBuffer(owner.owner)} for ${fromBuffer(transfer.address)}:${
@@ -108,6 +114,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
             }
           }
         } else if (owners.length && Number(owners[0].amount) > 1) {
+          // Fix owner balance
           logger.info(
             this.queueName,
             `Owner ${fromBuffer(owners[0].owner)} for ${fromBuffer(transfer.address)}:${
@@ -128,6 +135,49 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
             contract: transfer.address,
             tokenId: transfer.token_id,
           });
+        } else if (owners.length) {
+          // Fix wrong owner
+          const currentOwner = await this.getErc721CurrentOwner(
+            fromBuffer(transfer.address),
+            transfer.token_id
+          );
+
+          const updateOwnersQuery = `
+            UPDATE nft_balances
+            SET owner = $/currentOwner/, updated_at = NOW()
+            WHERE contract = $/contract/
+            AND token_id = $/tokenId/
+            AND owner != $/currentOwner/
+          `;
+
+          const { rowCount } = await idb.result(updateOwnersQuery, {
+            currentOwner: toBuffer(currentOwner),
+            contract: transfer.address,
+            tokenId: transfer.token_id,
+          });
+
+          if (rowCount > 0) {
+            logger.info(
+              this.queueName,
+              `Updated wrong owner to ${currentOwner} on ${fromBuffer(transfer.address)}:${
+                transfer.token_id
+              }`
+            );
+
+            const collection = await Collections.getByContractAndTokenId(
+              fromBuffer(transfer.address),
+              Number(transfer.token_id)
+            );
+
+            if (collection) {
+              await resyncUserCollectionsJob.addToQueue([
+                {
+                  user: currentOwner,
+                  collectionId: collection.id,
+                },
+              ]);
+            }
+          }
         }
       } else if (transfer.contract_kind === "erc1155") {
         // If not zero address update the balance
@@ -169,6 +219,24 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
     }
 
     return { addToQueue: false };
+  }
+
+  public async getErc721CurrentOwner(contract: string, tokenId: string) {
+    const currentOwnerQuery = `
+      SELECT nft_transfer_events.to
+      FROM nft_transfer_events
+      WHERE address = $/contract/
+      AND token_id = $/tokenId/
+      ORDER BY timestamp DESC, tx_index DESC, log_index DESC
+      LIMIT 1
+    `;
+
+    const currentOwner = await ridb.oneOrNone(currentOwnerQuery, {
+      contract: toBuffer(contract),
+      tokenId: tokenId,
+    });
+
+    return fromBuffer(currentOwner.to);
   }
 
   public async updateErc1155OwnerBalance(owner: string, contract: string, tokenId: string) {
