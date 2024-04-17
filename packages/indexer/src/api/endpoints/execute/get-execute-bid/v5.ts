@@ -12,10 +12,11 @@ import axios from "axios";
 import { randomUUID } from "crypto";
 import Joi from "joi";
 import _ from "lodash";
+import { redb } from "@/common/db";
 
 import { logger } from "@/common/logger";
 import { baseProvider } from "@/common/provider";
-import { bn, now, regex } from "@/common/utils";
+import { bn, now, regex, toBuffer } from "@/common/utils";
 import { config } from "@/config/index";
 import { ApiKeyManager } from "@/models/api-keys";
 import { FeeRecipients } from "@/models/fee-recipients";
@@ -237,6 +238,9 @@ export const getExecuteBidV5Options: RouteOptions = {
               .lowercase()
               .default(Sdk.Common.Addresses.WNative[config.chainId]),
             usePermit: Joi.boolean().description("When true, will use permit to avoid approvals."),
+            collectionBidBalanceCheck: Joi.boolean()
+              .optional()
+              .description("Check the maker has enough balance across all the open orders"),
           })
             .or("token", "collection", "tokenSetId")
             .oxor("token", "collection", "tokenSetId")
@@ -328,6 +332,7 @@ export const getExecuteBidV5Options: RouteOptions = {
         salt?: string;
         nonce?: string;
         usePermit?: string;
+        collectionBidBalanceCheck?: string;
       }[];
 
       // Source restrictions
@@ -756,15 +761,39 @@ export const getExecuteBidV5Options: RouteOptions = {
               : bn(params.weiPrice).mul(params.quantity ?? 1);
 
             // Check the maker's balance
+            let openOrderRequiredBalance = bn(0);
+
+            if (params.collectionBidBalanceCheck) {
+              // Get all the open orders' balance that required
+              const result = await redb.oneOrNone(
+                `
+                  SELECT
+                    sum(currency_price) as total_currency_price
+                  FROM orders
+                  WHERE orders.maker = $/maker/
+                  AND orders.fillability_status = 'fillable'
+                  AND orders.currency = $/currency/
+                `,
+                {
+                  maker: toBuffer(maker.toLowerCase()),
+                  currency: toBuffer(params.currency.toLowerCase()),
+                }
+              );
+              if (result?.total_currency_price) {
+                openOrderRequiredBalance = bn(result.total_currency_price);
+              }
+            }
 
             const currency = new Sdk.Common.Helpers.Erc20(baseProvider, params.currency);
             const currencyBalance = await currency.getBalance(maker);
             if (bn(currencyBalance).lt(totalPrice)) {
               if ([WNATIVE, BETH].includes(params.currency)) {
                 const ethBalance = await baseProvider.getBalance(maker);
-                if (bn(currencyBalance).add(ethBalance).lt(totalPrice)) {
+                if (
+                  bn(currencyBalance).add(ethBalance).sub(openOrderRequiredBalance).lt(totalPrice)
+                ) {
                   return errors.push({
-                    message: `Maker does not have sufficient balance currencyBalance=${currencyBalance.toString()}, ethBalance=${ethBalance.toString()}, totalPrice=${totalPrice.toString()}`,
+                    message: `Maker does not have sufficient balance currencyBalance=${currencyBalance.toString()}, ethBalance=${ethBalance.toString()}, totalPrice=${totalPrice.toString()}, openOrderRequiredBalance=${openOrderRequiredBalance.toString()}`,
                     orderIndex: i,
                   });
                 } else {
