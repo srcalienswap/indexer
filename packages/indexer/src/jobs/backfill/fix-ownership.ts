@@ -9,11 +9,11 @@ import { resyncUserCollectionsJob } from "@/jobs/nft-balance-updates/reynsc-user
 import { Collections } from "@/models/collections";
 import { AddressZero } from "@ethersproject/constants";
 import { fromUnixTime } from "date-fns";
-import { config } from "@/config/index";
 
 export type FixOwnershipJobCursorInfo = {
   syncUpToTimestamp: number;
   timestamp?: number;
+  disableErc1155?: boolean;
 };
 
 export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
@@ -25,7 +25,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
   singleActiveConsumer = true;
 
   public async process(payload: FixOwnershipJobCursorInfo) {
-    const { syncUpToTimestamp, timestamp } = payload;
+    const { syncUpToTimestamp, timestamp, disableErc1155 } = payload;
     const limit = 200;
     let cursor = "";
 
@@ -201,7 +201,7 @@ export class FixOwnershipJob extends AbstractRabbitMqJobHandler {
             }
           }
         }
-      } else if (config.chainId !== 70700 && transfer.contract_kind === "erc1155") {
+      } else if (!disableErc1155 && transfer.contract_kind === "erc1155") {
         // If not zero address update the balance
         if (
           ![AddressZero, "0x000000000000000000000000000000000000dead"].includes(
