@@ -250,7 +250,8 @@ export const extractByCollectionERC1155 = async (
   const c = new Contract(
     collection,
     new Interface([
-      "function computeTotalReward(uint256 numTokens) view returns(uint256)",
+      "function computeTotalReward(uint256 numTokens) view returns (uint256)",
+      "function computeTotalReward(uint256 mintPrice, uint256 numTokens) view returns (uint256)",
       "function getPermissions(uint256 tokenId, address user) view returns (uint256)",
       "function permissions(uint256 tokenId, address user) view returns (uint256)",
       "function mintFee() external view returns(uint256)",
@@ -268,8 +269,13 @@ export const extractByCollectionERC1155 = async (
   try {
     let totalRewards: BigNumber | undefined;
     try {
-      totalRewards = await c.computeTotalReward(1);
-    } catch {
+      totalRewards = await c["computeTotalReward(uint256)"](1);
+    } catch (error) {
+      // Skip error for old version
+    }
+    try {
+      totalRewards = await c["computeTotalReward(uint256,uint256)"](bn(10).pow(18), 1);
+    } catch (error) {
       // Skip error for old version
     }
 
