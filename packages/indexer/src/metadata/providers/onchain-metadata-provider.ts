@@ -40,7 +40,7 @@ const erc1155Interface = new ethers.utils.Interface([
 
 export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
   method = "onchain";
-  disableWarnLogging = config.chainId !== 11155111;
+  disableWarnLogging = true;
 
   // get metadata methods
 
@@ -737,19 +737,6 @@ export class OnchainMetadataProvider extends AbstractBaseMetadataProvider {
         .then((res) => handleTokenUriResponse(contract, tokenId, res))
         .catch((error) => handleTokenUriErrorResponse(contract, tokenId, error));
     } catch (error) {
-      if (contract === "0x901f7cfc8a99a5978a766ddc1c790a6623f3940b") {
-        logger.info(
-          "onchain-fetcher",
-          JSON.stringify({
-            message: `getTokenMetadataFromURI error. contract=${contract}, tokenId=${tokenId}`,
-            contract,
-            tokenId,
-            uri,
-            error,
-          })
-        );
-      }
-
       if (!this.disableWarnLogging) {
         logger.warn(
           "onchain-fetcher",
