@@ -32,7 +32,8 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
   const c = new Contract(
     collection,
     new Interface([
-      `function computeTotalReward(uint256 numTokens) view returns(uint256)`,
+      "function computeTotalReward(uint256 mintPrice, uint256 numTokens) view returns (uint256)",
+      "function computeTotalReward(uint256 numTokens) view returns (uint256)",
       `
         function saleDetails() view returns (
           (
@@ -58,9 +59,15 @@ export const extractByCollectionERC721 = async (collection: string): Promise<Col
   try {
     const saleDetails = await c.saleDetails();
     const fee = await c.zoraFeeForAmount(1).then((f: { fee: BigNumber }) => f.fee);
+
     let totalRewards: BigNumber | undefined;
     try {
-      totalRewards = await c.computeTotalReward(1);
+      totalRewards = await c["computeTotalReward(uint256)"](1);
+    } catch {
+      // Skip error for old version
+    }
+    try {
+      totalRewards = await c["computeTotalReward(uint256,uint256)"](bn(10).pow(18), 1);
     } catch {
       // Skip error for old version
     }
@@ -250,7 +257,8 @@ export const extractByCollectionERC1155 = async (
   const c = new Contract(
     collection,
     new Interface([
-      "function computeTotalReward(uint256 numTokens) view returns(uint256)",
+      "function computeTotalReward(uint256 numTokens) view returns (uint256)",
+      "function computeTotalReward(uint256 mintPrice, uint256 numTokens) view returns (uint256)",
       "function getPermissions(uint256 tokenId, address user) view returns (uint256)",
       "function permissions(uint256 tokenId, address user) view returns (uint256)",
       "function mintFee() external view returns(uint256)",
@@ -268,7 +276,12 @@ export const extractByCollectionERC1155 = async (
   try {
     let totalRewards: BigNumber | undefined;
     try {
-      totalRewards = await c.computeTotalReward(1);
+      totalRewards = await c["computeTotalReward(uint256)"](1);
+    } catch {
+      // Skip error for old version
+    }
+    try {
+      totalRewards = await c["computeTotalReward(uint256,uint256)"](bn(10).pow(18), 1);
     } catch {
       // Skip error for old version
     }
