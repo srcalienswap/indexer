@@ -267,6 +267,17 @@ export function limitFieldSize(
 }
 
 export function handleTokenUriResponse(contract: string, tokenId: string, response: any) {
+  if (contract === "0x901f7cfc8a99a5978a766ddc1c790a6623f3940b") {
+    logger.info(
+      "_getTokensMetadata",
+      JSON.stringify({
+        topic: "tokenMetadataIndexingDebug",
+        message: `handleTokenUriResponse. contract=${contract}, tokenId=${tokenId}`,
+        response: JSON.stringify(response),
+      })
+    );
+  }
+
   if (response.data !== null && typeof response.data === "object") {
     if (
       config.chainId === 1 &&
@@ -296,6 +307,22 @@ export function handleTokenUriErrorResponse(contract: string, tokenId: string, e
   //     errorResponseData: error.response?.data,
   //   })
   // );
+
+  if (contract === "0x901f7cfc8a99a5978a766ddc1c790a6623f3940b") {
+    logger.info(
+      "onchain-fetcher",
+      JSON.stringify({
+        topic: "tokenMetadataIndexingDebug",
+        message: `handleTokenUriErrorResponse. contract=${contract}, tokenId=${tokenId}`,
+        contract,
+        tokenId,
+        uri: error.request.url,
+        error,
+        errorResponseStatus: error.response?.status,
+        errorResponseData: error.response?.data,
+      })
+    );
+  }
 
   return [null, error.response?.status || error.code || `${error}`];
 }
