@@ -689,6 +689,7 @@ export const extractByTx = async (
     if (
       [
         "0x731133e9", // `mint`
+        "0x359f1302", // `mint`
         "0x9dbb844d", // `mintWithRewards`
         "0xc9a05470", // `premint`
         "0xd904b94a", // `callSale`
@@ -697,6 +698,7 @@ export const extractByTx = async (
     ) {
       const iface = new Interface([
         "function mint(address minter, uint256 tokenId, uint256 quantity, bytes data)",
+        "function mint(address minter, uint256 tokenId, uint256 quantity, address[] rewardsRecipients, bytes data)",
         "function mintWithRewards(address minter, uint256 tokenId, uint256 quantity, bytes minterArguments, address mintReferral)",
         "function premint((address, string, string) contractConfig, ((string, uint256, uint64, uint96, uint64, uint64, uint32, uint32, address, address), uint32 tokenId, uint32, bool) premintConfig, bytes signature, uint256 quantityToMint, string mintComment)",
         "function callSale(uint256 tokenId, address salesConfig, bytes data)",
@@ -710,6 +712,15 @@ export const extractByTx = async (
           tokenId = iface
             .decodeFunctionData(
               "mint(address minter, uint256 tokenId, uint256 quantity, bytes data)",
+              tx.data
+            )
+            .tokenId.toString();
+          break;
+
+        case "0x359f1302":
+          tokenId = iface
+            .decodeFunctionData(
+              "mint(address minter, uint256 tokenId, uint256 quantity, address[] rewardsRecipients, bytes data)",
               tx.data
             )
             .tokenId.toString();
