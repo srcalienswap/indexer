@@ -460,6 +460,7 @@ export const postExecuteMintV1Options: RouteOptions = {
               id: item.collection,
             }
           );
+          let errorMessage: string | undefined;
           if (collectionData) {
             // Fetch any open mints on the collection which the taker is elligible for
             const openMints = await mints.getCollectionMints(item.collection, {
@@ -541,7 +542,8 @@ export const postExecuteMintV1Options: RouteOptions = {
                   }
 
                   item.quantity -= quantityToMint;
-                } catch {
+                } catch (error) {
+                  errorMessage = (error as Error).message;
                   // Skip errors
                   // Mostly coming from allowlist mints for which the user is not authorized
                   // TODO: Have an allowlist check instead of handling it via `try` / `catch`
@@ -556,8 +558,9 @@ export const postExecuteMintV1Options: RouteOptions = {
             if (!hasActiveMints) {
               lastError = "Collection has no eligible mints";
             } else {
-              lastError =
-                "Unable to mint requested quantity (max mints per wallet possibly exceeded)";
+              lastError = `Unable to mint requested quantity (${
+                errorMessage ?? "max mints per wallet possibly exceeded"
+              }) `;
             }
 
             if (!payload.partial) {
