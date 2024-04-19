@@ -12,7 +12,7 @@ import { ConduitController } from "../../seaport-base";
 import { constructOfferCounterOrderAndFulfillments } from "../../seaport-base/helpers";
 
 import * as Sdk from "../../index";
-import { TxData, bn, generateSourceBytes, getErrorMessage, uniqBy } from "../../utils";
+import { Network, TxData, bn, generateSourceBytes, getErrorMessage, uniqBy } from "../../utils";
 import * as Addresses from "./addresses";
 import * as ApprovalProxy from "./approval-proxy";
 import { PermitHandler } from "./permit";
@@ -5923,24 +5923,31 @@ export class Router {
         });
       }
     } else if (executionsWithDetails.length >= 1) {
+      //
+      let transferItems = nftTransferItems;
+      // if the chain is not proof of play, do the exclusion
+      if (this.chainId !== Network.Apex) {
+        // Exclude any transfer items which don't have a corresponding execution
+        transferItems = nftTransferItems.filter(({ items }) =>
+          executionsWithDetails.find(
+            ({ detail }) =>
+              items[0].itemType ===
+                (detail.contractKind === "erc721"
+                  ? ApprovalProxy.ItemType.ERC721
+                  : ApprovalProxy.ItemType.ERC1155) &&
+              detail.contract === items[0].token &&
+              detail.tokenId === items[0].identifier
+          )
+        );
+      }
+
       txs.push({
         txData: {
           from: taker,
           to: this.contracts.approvalProxy.address,
           data:
             this.contracts.approvalProxy.interface.encodeFunctionData("bulkTransferWithExecute", [
-              // Exclude any transfer items which don't have a corresponding execution
-              nftTransferItems.filter(({ items }) =>
-                executionsWithDetails.find(
-                  ({ detail }) =>
-                    items[0].itemType ===
-                      (detail.contractKind === "erc721"
-                        ? ApprovalProxy.ItemType.ERC721
-                        : ApprovalProxy.ItemType.ERC1155) &&
-                    detail.contract === items[0].token &&
-                    detail.tokenId === items[0].identifier
-                )
-              ),
+              transferItems,
               [...executionsWithDetails.map(({ execution }) => execution)],
               Sdk.SeaportBase.Addresses.ReservoirConduitKey[this.chainId],
             ]) + generateSourceBytes(options?.source),
