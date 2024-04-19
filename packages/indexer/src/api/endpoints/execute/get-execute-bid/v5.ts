@@ -665,7 +665,10 @@ export const getExecuteBidV5Options: RouteOptions = {
               await checkBlacklistAndFallback(token.split(":")[0], params);
             }
           } catch (error) {
-            return errors.push({ message: (error as any).message, orderIndex: i });
+            return errors.push({
+              message: `Blacklist check error: ${(error as any).message}`,
+              orderIndex: i,
+            });
           }
 
           // PPv2 restrictions
@@ -1838,7 +1841,7 @@ export const getExecuteBidV5Options: RouteOptions = {
             }
           } catch (error: any) {
             return errors.push({
-              message: error.response?.data ? JSON.stringify(error.response.data) : error.message,
+              message: JSON.stringify(error),
               orderIndex: i,
             });
           }
