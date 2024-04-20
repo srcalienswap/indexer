@@ -13,9 +13,10 @@ import { randomUUID } from "crypto";
 import Joi from "joi";
 import _ from "lodash";
 
+import { redb } from "@/common/db";
 import { logger } from "@/common/logger";
 import { baseProvider } from "@/common/provider";
-import { bn, now, regex } from "@/common/utils";
+import { bn, now, regex, toBuffer } from "@/common/utils";
 import { config } from "@/config/index";
 import { ApiKeyManager } from "@/models/api-keys";
 import { FeeRecipients } from "@/models/fee-recipients";
@@ -237,6 +238,11 @@ export const getExecuteBidV5Options: RouteOptions = {
               .lowercase()
               .default(Sdk.Common.Addresses.WNative[config.chainId]),
             usePermit: Joi.boolean().description("When true, will use permit to avoid approvals."),
+            checkMakerOutstandingBalance: Joi.boolean()
+              .optional()
+              .description(
+                "Check if the maker has enough balance to cover all open bid orders (of the current token / collection / attribute type)"
+              ),
           })
             .or("token", "collection", "tokenSetId")
             .oxor("token", "collection", "tokenSetId")
@@ -328,6 +334,7 @@ export const getExecuteBidV5Options: RouteOptions = {
         salt?: string;
         nonce?: string;
         usePermit?: string;
+        checkMakerOutstandingBalance?: string;
       }[];
 
       // Source restrictions
@@ -758,16 +765,60 @@ export const getExecuteBidV5Options: RouteOptions = {
               ? bn(params.weiPrice)
               : bn(params.weiPrice).mul(params.quantity ?? 1);
 
-            // Check the maker's balance
+            const attribute =
+              collectionId && attributeKey && attributeValue
+                ? {
+                    collection: collectionId,
+                    key: attributeKey,
+                    value: attributeValue,
+                  }
+                : undefined;
+            const collection =
+              collectionId && !attributeKey && !attributeValue ? collectionId : undefined;
+
+            let makerOutstandingBalance = bn(0);
+            if (params.checkMakerOutstandingBalance) {
+              if (!collection) {
+                return errors.push({
+                  message: "Balance checks are only supported for collection bids",
+                  orderIndex: i,
+                });
+              }
+
+              const result = await redb.oneOrNone(
+                `
+                  SELECT
+                    sum(orders.currency_price * orders.quantity_remaining) AS total_balance
+                  FROM orders
+                  JOIN token_sets
+                    ON orders.token_set_id = token_sets.id
+                  WHERE token_sets.collection_id = $/collection/
+                    AND orders.side = 'buy'
+                    AND orders.maker = $/maker/
+                    AND orders.currency = $/currency/
+                    AND (orders.fillability_status = 'fillable' OR orders.fillability_status = 'no-balance')
+                `,
+                {
+                  collection,
+                  maker: toBuffer(maker),
+                  currency: toBuffer(params.currency),
+                }
+              );
+              if (result?.total_balance) {
+                makerOutstandingBalance = bn(result.total_balance);
+              }
+            }
 
             const currency = new Sdk.Common.Helpers.Erc20(baseProvider, params.currency);
             const currencyBalance = await currency.getBalance(maker);
             if (bn(currencyBalance).lt(totalPrice)) {
               if ([WNATIVE, BETH].includes(params.currency)) {
-                const ethBalance = await baseProvider.getBalance(maker);
-                if (bn(currencyBalance).add(ethBalance).lt(totalPrice)) {
+                const nativeBalance = await baseProvider.getBalance(maker);
+                if (
+                  bn(currencyBalance).add(nativeBalance).sub(makerOutstandingBalance).lt(totalPrice)
+                ) {
                   return errors.push({
-                    message: `Maker does not have sufficient balance currencyBalance=${currencyBalance.toString()}, ethBalance=${ethBalance.toString()}, totalPrice=${totalPrice.toString()}`,
+                    message: `Maker does not have sufficient balance (currencyBalance = ${currencyBalance.toString()}, nativeBalance = ${nativeBalance.toString()}, totalPrice = ${totalPrice.toString()}, makerOutstandingBalance = ${makerOutstandingBalance.toString()})`,
                     orderIndex: i,
                   });
                 } else {
@@ -790,17 +841,6 @@ export const getExecuteBidV5Options: RouteOptions = {
                 });
               }
             }
-
-            const attribute =
-              collectionId && attributeKey && attributeValue
-                ? {
-                    collection: collectionId,
-                    key: attributeKey,
-                    value: attributeValue,
-                  }
-                : undefined;
-            const collection =
-              collectionId && !attributeKey && !attributeValue ? collectionId : undefined;
 
             const supportedPermitCurrencies = Sdk.Common.Addresses.Usdc[config.chainId] ?? [];
             if (params.usePermit && !supportedPermitCurrencies.includes(params.currency)) {
