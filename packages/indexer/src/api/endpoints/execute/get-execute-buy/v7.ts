@@ -1051,6 +1051,7 @@ export const getExecuteBuyV7Options: RouteOptions = {
                 WHERE orders.fillability_status = 'fillable'
                   AND orders.approval_status = 'approved'
                   AND orders.maker != $/taker/
+                ORDER BY orders.value
                 LIMIT $/quantity/
               `,
               {
