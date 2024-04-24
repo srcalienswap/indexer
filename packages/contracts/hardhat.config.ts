@@ -174,6 +174,16 @@ const config: HardhatUserConfig = {
       chainId: networkConfig.chainId,
       url: "http://127.0.0.1:8545",
     },
+    xlayerTestnet: {
+      chainId: 195,
+      url: "https://testrpc.xlayer.tech",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
+    xlayerMainnet: {
+      chainId: 196,
+      url: "https://rpc.xlayer.tech",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
     // Mainnets
     mainnet: getNetworkConfig(1),
     optimism: getNetworkConfig(10),
@@ -229,6 +239,7 @@ const config: HardhatUserConfig = {
       opBnb: "0x",
       apex: "0x",
       blast: process.env.ETHERSCAN_API_KEY_BLAST ?? "",
+      xlayerMainnet: process.env.OKLINK_API_KEY ?? "",
       // Testnets
       goerli: process.env.ETHERSCAN_API_KEY_GOERLI ?? "",
       mantleTestnet: "0x",
@@ -243,8 +254,26 @@ const config: HardhatUserConfig = {
       garnet: "0x",
       redstone: "0x",
       amoy: "0x",
+      xlayerTestnet: process.env.OKLINK_API_KEY ?? "",
     },
     customChains: [
+      // xlayer
+      {
+        network: "xlayerTestnet",
+        chainId: 195, //196 for mainnet
+        urls: {
+          apiURL: "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER_TESTNET",
+          browserURL: "https://www.oklink.com/xlayer-test"
+        }
+      },
+      {
+        network: "xlayerMainnet",
+        chainId: 196,
+        urls: {
+          apiURL: "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER",
+          browserURL: "https://www.oklink.com/xlayer"
+        }
+      },
       // Mainnets
       {
         network: "zkSync",
