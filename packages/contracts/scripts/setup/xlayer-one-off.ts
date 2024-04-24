@@ -29,7 +29,8 @@ async function main() {
     fs.writeFileSync("deployed-contracts.txt", `${contractName}: ${reservoirAddress}\n`);
     await verify(reservoirAddress, args);
 
-    const conduitControllerAddress = "0xF4DF163BD47de2F1F1694Fa3e2958b4adA9E5403"; // testnet
+    // const conduitControllerAddress = "0xF4DF163BD47de2F1F1694Fa3e2958b4adA9E5403"; // testnet
+    const conduitControllerAddress = "0x2eB4Ef12f7d0050db8aC54fb99BCA24f0f9D8E44"; // mainnet
 
     contractName = "ReservoirApprovalProxy";
     contractFactory = await ethers.getContractFactory(contractName);
@@ -42,7 +43,8 @@ async function main() {
     fs.appendFileSync("deployed-contracts.txt", `${contractName}: ${reservoirApprovalProxyAddress}\n`);
     await verify(reservoirApprovalProxyAddress, args);
 
-    const alienswapAddress = "0xeCc35Cd2D2A18e1F5224bC243E89d08714Ee9918"; // testnet
+    // const alienswapAddress = "0xeCc35Cd2D2A18e1F5224bC243E89d08714Ee9918"; // testnet
+    const alienswapAddress = "0xa916124D8501431b250147AF769BE4a418b46668"; // mainnet
 
     contractName = "AlienswapV2Module";
     contractFactory = await ethers.getContractFactory(contractName);
