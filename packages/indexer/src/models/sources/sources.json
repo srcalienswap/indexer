@@ -45,6 +45,16 @@
       "tokenUrlGoerli": "https://rinkeby.looksrare.org/collections/${contract}/${tokenId}"
     }
   },
+  "4": {
+    "domain": "alienswap.xyz",
+    "domainHash": "",
+    "name": "alienswap.xyz",
+    "address": "0x0000000000000000000000000000000000000000",
+    "data": {
+      "icon": "https://alienswap.xyz/images/logo/logo-alienswap.svg",
+      "title": "alienswap.xyz"
+    }
+  },
   "5": {
     "domain": "pleasebepatientwith.me",
     "domainHash": "0x89abc8c1",
