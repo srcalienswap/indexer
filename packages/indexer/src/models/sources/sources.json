@@ -47,9 +47,9 @@
   },
   "4": {
     "domain": "alienswap.xyz",
-    "domainHash": "",
+    "domainHash": "0xb48fb141",
     "name": "alienswap.xyz",
-    "address": "0x0000000000000000000000000000000000000000",
+    "address": "0x7d5f459f1cfa967d560cc6c466e6af230d799988",
     "data": {
       "icon": "https://alienswap.xyz/images/logo/logo-alienswap.svg",
       "title": "alienswap.xyz"
