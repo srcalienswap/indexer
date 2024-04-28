@@ -608,7 +608,7 @@ export const getNetworkSettings = (): NetworkSettings => {
                   decimals,
                   metadata
                 ) VALUES (
-                  '\x0000000000000000000000000000000000000000',
+                  '\\x0000000000000000000000000000000000000000',
                   'OKB',
                   'OKB',
                   18,
