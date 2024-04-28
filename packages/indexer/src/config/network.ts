@@ -16,7 +16,7 @@ export const getNetworkName = () => {
       return "mainnet";
 
     case 196:
-      return "XLayer";
+      return "xlayer";
 
     case 5:
       return "goerli";
