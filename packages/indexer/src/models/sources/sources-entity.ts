@@ -20,6 +20,7 @@ export type SourcesMetadata = {
   twitterUsername?: string;
   socialImage?: string;
   tokenUrlMainnet?: string;
+  tokenUrlXLayer?: string;
   tokenUrlRinkeby?: string;
   tokenUrlPolygon?: string;
   tokenUrlGoerli?: string;

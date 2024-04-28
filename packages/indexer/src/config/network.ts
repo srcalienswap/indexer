@@ -15,6 +15,9 @@ export const getNetworkName = () => {
     case 1:
       return "mainnet";
 
+    case 196:
+      return "XLayer";
+
     case 5:
       return "goerli";
 
@@ -573,6 +576,50 @@ export const getNetworkSettings = (): NetworkSettings => {
           ]);
         },
       };
+    //XLayer
+    case 196: {
+      return {
+        ...defaultNetworkSettings,
+        enableWebSocket: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 5,
+        lastBlockLatency: 5,
+        headBlockDelay: 10,
+        coingecko: {
+          networkId: "x-layer",
+        },
+        elasticsearch: {
+          indexes: {
+            activities: {
+              ...defaultNetworkSettings.elasticsearch?.indexes?.activities,
+              numberOfShards: 10,
+            },
+          },
+        },
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                INSERT INTO currencies (
+                  contract,
+                  name,
+                  symbol,
+                  decimals,
+                  metadata
+                ) VALUES (
+                  '\x0000000000000000000000000000000000000000',
+                  'OKB',
+                  'OKB',
+                  18,
+                  '{"coingeckoCurrencyId": "okb", "image": "https://assets.coingecko.com/coins/images/4463/large/WeChat_Image_20220118095654.png"}'
+                ) ON CONFLICT DO NOTHING
+              `
+            ),
+          ]);
+        },
+      };
+    }
     // Goerli
     case 5: {
       return {

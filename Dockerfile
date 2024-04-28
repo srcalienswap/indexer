@@ -5,13 +5,8 @@ ARG PORT=80
 EXPOSE ${PORT}
 
 WORKDIR /indexer
-RUN <<EOF
-set -e
-mkdir -p packages/contracts
-mkdir -p packages/indexer
-mkdir -p packages/mint-interface
-mkdir -p packages/sdk
-EOF
+RUN mkdir -p packages/contracts && mkdir -p packages/indexer && mkdir -p packages/mint-interface && mkdir -p packages/sdk
+RUN mkdir /root/.aws && touch /root/.aws/config
 ADD package.json yarn.lock .
 ADD packages/contracts/package.json packages/contracts
 ADD packages/indexer/package.json packages/indexer/yarn.lock packages/indexer

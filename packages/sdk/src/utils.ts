@@ -127,6 +127,7 @@ export type TxData = {
 export enum Network {
   // Mainnets
   Ethereum = 1,
+  XLayer = 196,
   Optimism = 10,
   Bsc = 56,
   Polygon = 137,
