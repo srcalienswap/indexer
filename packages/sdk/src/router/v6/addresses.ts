@@ -43,7 +43,7 @@ export const Router: ChainIdToAddress = {
 
 export const ApprovalProxy: ChainIdToAddress = {
   [Network.Ethereum]: "0x79ce8f93063f8be4573a58f250b003859ebb7a24",
-  [Network.XLayer]: "0x2fff099a564a9fae2fd5863c606640928cd44813",
+  [Network.XLayer]: "0xb778cabc9987c6f3cbd77ef138f9523b86536943",
   [Network.EthereumGoerli]: "0x79ce8f93063f8be4573a58f250b003859ebb7a24",
   [Network.EthereumSepolia]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
   [Network.Polygon]: "0x79ce8f93063f8be4573a58f250b003859ebb7a24",
