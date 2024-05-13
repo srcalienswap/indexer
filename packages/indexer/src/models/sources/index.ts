@@ -408,6 +408,15 @@ export class Sources {
         );
         return _.replace(sourceEntity.metadata.url, "${tokenId}", tokenId);
       }
+    } else if (config.chainId == 10241025) {
+      if (sourceEntity.metadata.tokenUrlHalTestnet && contract && tokenId) {
+        sourceEntity.metadata.url = _.replace(
+          sourceEntity.metadata.tokenUrlHalTestnet,
+          "${contract}",
+          contract
+        );
+        return _.replace(sourceEntity.metadata.url, "${tokenId}", tokenId);
+      }
     } else if (config.chainId == 10) {
       if (sourceEntity.metadata.tokenUrlOptimism && contract && tokenId) {
         sourceEntity.metadata.url = _.replace(

@@ -5,6 +5,7 @@ import { ChainIdToAddress, Network } from "../../utils";
 // V6_0_1
 export const Router: ChainIdToAddress = {
   [Network.Ethereum]: "0xc2c862322e9c97d6244a3506655da95f05246fd8",
+  [Network.HalTestnet]: "0x9ef76ead9cf62232b05ab26fe8b749d0d6ab4dfc",
   [Network.XLayer]: "0x2fff099a564a9fae2fd5863c606640928cd44813",
   [Network.EthereumGoerli]: "0xc2c862322e9c97d6244a3506655da95f05246fd8",
   [Network.EthereumSepolia]: "0x1aed60a97192157fda7fb26267a439d523d09c5e",
@@ -43,6 +44,7 @@ export const Router: ChainIdToAddress = {
 
 export const ApprovalProxy: ChainIdToAddress = {
   [Network.Ethereum]: "0x79ce8f93063f8be4573a58f250b003859ebb7a24",
+  [Network.HalTestnet]: "0x3cb4ce90cf0cd4737e1075bec5640671782eff0a",
   [Network.XLayer]: "0xb778cabc9987c6f3cbd77ef138f9523b86536943",
   [Network.EthereumGoerli]: "0x79ce8f93063f8be4573a58f250b003859ebb7a24",
   [Network.EthereumSepolia]: "0x224ecb4eae96d31372d1090c3b0233c8310dbbab",
@@ -214,6 +216,7 @@ export const SeaportV15Module: ChainIdToAddress = {
 
 export const AlienswapModule: ChainIdToAddress = {
   [Network.Ethereum]: "0xb56fa88072f5e299331cbb810d25075f6caa889c",
+  [Network.HalTestnet]: "0xc658039910fe35082cfc23e337be7e2a51b8e1aa",
   [Network.XLayer]: "0xed633880d516719c02f0db7c197a3ac9ddd2e306",
   [Network.EthereumGoerli]: "0xb56fa88072f5e299331cbb810d25075f6caa889c",
   [Network.MantleTestnet]: "0xf94d47c742c97f37424db1c27817a0697d49f461",

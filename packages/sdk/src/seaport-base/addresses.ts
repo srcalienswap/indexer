@@ -52,6 +52,7 @@ export const ReservoirConduitKey: ChainIdToAddress = {
 
 export const ConduitController: ChainIdToAddress = {
   [Network.Ethereum]: "0x00000000f9490004c11cef243f5400493c00ad63",
+  [Network.HalTestnet]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.XLayer]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.Bsc]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.Optimism]: "0x00000000f9490004c11cef243f5400493c00ad63",
@@ -90,6 +91,7 @@ export const ConduitController: ChainIdToAddress = {
 // https://github.com/ProjectOpenSea/seaport/blob/0a8e82ce7262b5ce0e67fa98a2131fd4c47c84e9/contracts/conduit/ConduitController.sol#L493
 export const ConduitControllerCodeHash: ChainIdToAddress = {
   [Network.Ethereum]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
+  [Network.HalTestnet]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.XLayer]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.EthereumGoerli]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.EthereumSepolia]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
