@@ -184,6 +184,11 @@ const config: HardhatUserConfig = {
       url: "https://rpc.xlayer.tech",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+    hal: {
+      chainId: 10241025,
+      url: "https://hal.rpc.caldera.xyz/http",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
     // Mainnets
     mainnet: getNetworkConfig(1),
     optimism: getNetworkConfig(10),
@@ -255,8 +260,18 @@ const config: HardhatUserConfig = {
       redstone: "0x",
       amoy: "0x",
       xlayerTestnet: process.env.OKLINK_API_KEY ?? "",
+      hal: "0x"
     },
     customChains: [
+      // hal
+      {
+        network: "hal",
+        chainId: 10241025,
+        urls: {
+          apiURL: "https://hal-explorer.alienxchain.io/api",
+          browserURL: "https://hal-explorer.alienxchain.io/",
+        },
+      },
       // xlayer
       {
         network: "xlayerTestnet",
