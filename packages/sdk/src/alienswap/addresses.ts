@@ -2,6 +2,7 @@ import { ChainIdToAddress, Network } from "../utils";
 
 export const Exchange: ChainIdToAddress = {
   [Network.Ethereum]: "0x83746de31fc8de985ffe46c1c20ea6d7d8f4ed3a",
+  [Network.MintChain]: "0x790a46e50d154a8fe012e537cc1613db80bbc9c3",
   [Network.HalTestnet]: "0x47d6757cc474a95b9536156c7f35ad48a0d4d999",
   [Network.XLayer]: "0x156add7faf8391dcbcc904b0eba0e8bf518265ba",
   [Network.EthereumGoerli]: "0x83746de31fc8de985ffe46c1c20ea6d7d8f4ed3a",
@@ -18,6 +19,7 @@ export const Exchange: ChainIdToAddress = {
 
 export const AlienswapConduitKey: ChainIdToAddress = {
   [Network.Ethereum]: "0xb9f312a053a074bc69bbae4caa423d74b1301cc6000000000000000000000000",
+  [Network.MintChain]: "0xc813078eeddf805768627d63bfb7043e1c5af7ff000000000000000000000000",
   [Network.HalTestnet]: "0xbb2aa4b3656d859d36376ba525d9a67091ebcc72000000000000000000000000",
   [Network.XLayer]: "0xdc17c60e799174f18cc6527a52d60462df84bc97000000000000000000000000",
   [Network.EthereumGoerli]: "0xb9f312a053a074bc69bbae4caa423d74b1301cc6000000000000000000000000",

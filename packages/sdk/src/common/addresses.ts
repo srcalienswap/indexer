@@ -5,6 +5,7 @@ import { ChainIdToAddress, ChainIdToAddressList, Network } from "../utils";
 // Native currency
 export const Native: ChainIdToAddress = {
   [Network.Ethereum]: AddressZero,
+  [Network.MintChain]: AddressZero,
   [Network.HalTestnet]: AddressZero,
   [Network.XLayer]: AddressZero,
   [Network.EthereumGoerli]: AddressZero,
@@ -44,6 +45,7 @@ export const Native: ChainIdToAddress = {
 // Wrapped native currency
 export const WNative: ChainIdToAddress = {
   [Network.Ethereum]: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+  [Network.MintChain]: "0x4200000000000000000000000000000000000006",
   [Network.HalTestnet]: "0x67f35f1f1781272c96e5e3ba5c6e8779e4ecbe0b",
   [Network.XLayer]: "0xe538905cf8410324e03a5a23c1c177a474d59b2b",
   [Network.EthereumGoerli]: "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6",

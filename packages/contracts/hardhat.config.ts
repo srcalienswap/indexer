@@ -10,8 +10,8 @@ import "hardhat-gas-reporter";
 // import "hardhat-tracer";
 
 // For zkSync
-import "@matterlabs/hardhat-zksync-deploy";
-import "@matterlabs/hardhat-zksync-solc";
+// import "@matterlabs/hardhat-zksync-deploy";
+// import "@matterlabs/hardhat-zksync-solc";
 
 const getNetworkConfig = (chainId?: number) => {
   if (!chainId) {
@@ -174,6 +174,16 @@ const config: HardhatUserConfig = {
       chainId: networkConfig.chainId,
       url: "http://127.0.0.1:8545",
     },
+    mintMainnet: {
+      url: "https://rpc.mintchain.io",
+      accounts: [process.env.PRIVATE_KEY as string],
+      gasPrice: 1000000000,
+    },
+    "mint-sepolia": {
+      chainId: 1687,
+      url: "https://sepolia-testnet-rpc.mintchain.io",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
     xlayerTestnet: {
       chainId: 195,
       url: "https://testrpc.xlayer.tech",
@@ -260,9 +270,29 @@ const config: HardhatUserConfig = {
       redstone: "0x",
       amoy: "0x",
       xlayerTestnet: process.env.OKLINK_API_KEY ?? "",
-      hal: "0x"
+      hal: "0x",
+      "mint-sepolia":"0x",
+      mintMainnet: "0x"
     },
     customChains: [
+      // mint chain mainnet
+      {
+        network: "mintMainnet",
+        chainId: 185,
+        urls: {
+          apiURL: "https://explorer.mintchain.io/api",
+          browserURL: "https://explorer.mintchain.io",
+        },
+      },
+      // mintchain-sepolia
+      {
+        network: "mint-sepolia",
+        chainId: 1687,
+        urls: {
+          apiURL: "https://sepolia-testnet-explorer.mintchain.io/api",
+          browserURL: "https://sepolia-testnet-explorer.mintchain.io/"
+        }
+      },
       // hal
       {
         network: "hal",

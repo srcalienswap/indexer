@@ -2,6 +2,7 @@ import { ChainIdToAddress, Network } from "../utils";
 
 export const Exchange: ChainIdToAddress = {
   [Network.Ethereum]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
+  [Network.MintChain]: "0x790a46e50d154a8fe012e537cc1613db80bbc9c3",
   [Network.HalTestnet]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
   [Network.XLayer]: "0x156add7faf8391dcbcc904b0eba0e8bf518265ba",
   [Network.EthereumGoerli]: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
