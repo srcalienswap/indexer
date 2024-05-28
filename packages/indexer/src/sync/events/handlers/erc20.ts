@@ -1,5 +1,6 @@
 import { getEventData } from "@/events-sync/data";
 import { EnhancedEvent, OnChainData } from "@/events-sync/handlers/utils";
+import { AddressZero } from "@ethersproject/constants";
 
 export const handleEvents = async (events: EnhancedEvent[], onChainData: OnChainData) => {
   // Handle the events
@@ -86,70 +87,70 @@ export const handleEvents = async (events: EnhancedEvent[], onChainData: OnChain
 
         break;
       }
-      // WOKB的deposit和withdrawal同时抛出了transfer和自己的事件，会造成本地余额计算错误
-      // case "weth-deposit": {
-      //   const parsedLog = eventData.abi.parseLog(log);
-      //   const to = parsedLog.args["to"].toLowerCase();
-      //   const amount = parsedLog.args["amount"].toString();
 
-      //   onChainData.ftTransferEvents.push({
-      //     from: AddressZero,
-      //     to,
-      //     amount,
-      //     baseEventParams,
-      //   });
+      case "weth-deposit": {
+        const parsedLog = eventData.abi.parseLog(log);
+        const to = parsedLog.args["to"].toLowerCase();
+        const amount = parsedLog.args["amount"].toString();
 
-      //   // Make sure to only handle the same data once per transaction
-      //   const contextPrefix = `${baseEventParams.txHash}-${baseEventParams.address}`;
+        onChainData.ftTransferEvents.push({
+          from: AddressZero,
+          to,
+          amount,
+          baseEventParams,
+        });
 
-      //   onChainData.makerInfos.push({
-      //     context: `${contextPrefix}-${to}-buy-balance`,
-      //     maker: to,
-      //     trigger: {
-      //       kind: "balance-change",
-      //       txHash: baseEventParams.txHash,
-      //       txTimestamp: baseEventParams.timestamp,
-      //     },
-      //     data: {
-      //       kind: "buy-balance",
-      //       contract: baseEventParams.address,
-      //     },
-      //   });
+        // Make sure to only handle the same data once per transaction
+        const contextPrefix = `${baseEventParams.txHash}-${baseEventParams.address}`;
 
-      //   break;
-      // }
+        onChainData.makerInfos.push({
+          context: `${contextPrefix}-${to}-buy-balance`,
+          maker: to,
+          trigger: {
+            kind: "balance-change",
+            txHash: baseEventParams.txHash,
+            txTimestamp: baseEventParams.timestamp,
+          },
+          data: {
+            kind: "buy-balance",
+            contract: baseEventParams.address,
+          },
+        });
 
-      // case "weth-withdrawal": {
-      //   const parsedLog = eventData.abi.parseLog(log);
-      //   const from = parsedLog.args["from"].toLowerCase();
-      //   const amount = parsedLog.args["amount"].toString();
+        break;
+      }
 
-      //   onChainData.ftTransferEvents.push({
-      //     from,
-      //     to: AddressZero,
-      //     amount,
-      //     baseEventParams,
-      //   });
+      case "weth-withdrawal": {
+        const parsedLog = eventData.abi.parseLog(log);
+        const from = parsedLog.args["from"].toLowerCase();
+        const amount = parsedLog.args["amount"].toString();
 
-      //   // Make sure to only handle the same data once per transaction
-      //   const contextPrefix = `${baseEventParams.txHash}-${baseEventParams.address}`;
+        onChainData.ftTransferEvents.push({
+          from,
+          to: AddressZero,
+          amount,
+          baseEventParams,
+        });
 
-      //   onChainData.makerInfos.push({
-      //     context: `${contextPrefix}-${from}-buy-balance`,
-      //     maker: from,
-      //     trigger: {
-      //       kind: "balance-change",
-      //       txHash: baseEventParams.txHash,
-      //       txTimestamp: baseEventParams.timestamp,
-      //     },
-      //     data: {
-      //       kind: "buy-balance",
-      //       contract: baseEventParams.address,
-      //     },
-      //   });
+        // Make sure to only handle the same data once per transaction
+        const contextPrefix = `${baseEventParams.txHash}-${baseEventParams.address}`;
 
-      //   break;
-      // }
+        onChainData.makerInfos.push({
+          context: `${contextPrefix}-${from}-buy-balance`,
+          maker: from,
+          trigger: {
+            kind: "balance-change",
+            txHash: baseEventParams.txHash,
+            txTimestamp: baseEventParams.timestamp,
+          },
+          data: {
+            kind: "buy-balance",
+            contract: baseEventParams.address,
+          },
+        });
+
+        break;
+      }
     }
   }
 };
