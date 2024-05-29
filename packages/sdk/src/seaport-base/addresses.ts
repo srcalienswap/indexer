@@ -18,6 +18,7 @@ export const OpenseaConduitKey: ChainIdToAddress = {
 
 export const ReservoirConduitKey: ChainIdToAddress = {
   [Network.Ethereum]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
+  [Network.MintChain]: "0xc813078eeddf805768627d63bfb7043e1c5af7ff000000000000000000000000",
   [Network.HalTestnet]: "0xbb2aa4b3656d859d36376ba525d9a67091ebcc72000000000000000000000000",
   [Network.XLayer]: "0xdc17c60e799174f18cc6527a52d60462df84bc97000000000000000000000000",
   [Network.EthereumGoerli]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
