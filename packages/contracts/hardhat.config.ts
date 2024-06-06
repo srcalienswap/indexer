@@ -174,6 +174,11 @@ const config: HardhatUserConfig = {
       chainId: networkConfig.chainId,
       url: "http://127.0.0.1:8545",
     },
+    alienx: {
+      url: "https://alienx.calderachain.xyz/infra-partner-http",
+      accounts: [process.env.PRIVATE_KEY as string],
+      gasPrice: 1000000000,
+    },
     mintMainnet: {
       url: "https://rpc.mintchain.io",
       accounts: [process.env.PRIVATE_KEY as string],
@@ -272,9 +277,19 @@ const config: HardhatUserConfig = {
       xlayerTestnet: process.env.OKLINK_API_KEY ?? "",
       hal: "0x",
       "mint-sepolia":"0x",
-      mintMainnet: "0x"
+      mintMainnet: "0x",
+      alienx: "0x"
     },
     customChains: [
+      // alienx mainnet
+      {
+        network: "alienx",
+        chainId: 10241024,
+        urls: {
+          apiURL: "https://alienx.calderaexplorer.xyz/api",
+          browserURL: "https://alienx.calderaexplorer.xyz/",
+        },
+      },
       // mint chain mainnet
       {
         network: "mintMainnet",

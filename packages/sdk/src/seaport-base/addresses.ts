@@ -18,6 +18,7 @@ export const OpenseaConduitKey: ChainIdToAddress = {
 
 export const ReservoirConduitKey: ChainIdToAddress = {
   [Network.Ethereum]: "0xf3d63166f0ca56c3c1a3508fce03ff0cf3fb691e000000000000000000000000",
+  [Network.Alienx]: "0xc813078eeddf805768627d63bfb7043e1c5af7ff000000000000000000000000",
   [Network.MintChain]: "0xc813078eeddf805768627d63bfb7043e1c5af7ff000000000000000000000000",
   [Network.HalTestnet]: "0xbb2aa4b3656d859d36376ba525d9a67091ebcc72000000000000000000000000",
   [Network.XLayer]: "0xdc17c60e799174f18cc6527a52d60462df84bc97000000000000000000000000",
@@ -54,6 +55,7 @@ export const ReservoirConduitKey: ChainIdToAddress = {
 
 export const ConduitController: ChainIdToAddress = {
   [Network.Ethereum]: "0x00000000f9490004c11cef243f5400493c00ad63",
+  [Network.Alienx]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.MintChain]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.HalTestnet]: "0x00000000f9490004c11cef243f5400493c00ad63",
   [Network.XLayer]: "0x00000000f9490004c11cef243f5400493c00ad63",
@@ -94,6 +96,7 @@ export const ConduitController: ChainIdToAddress = {
 // https://github.com/ProjectOpenSea/seaport/blob/0a8e82ce7262b5ce0e67fa98a2131fd4c47c84e9/contracts/conduit/ConduitController.sol#L493
 export const ConduitControllerCodeHash: ChainIdToAddress = {
   [Network.Ethereum]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
+  [Network.Alienx]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.MintChain]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.HalTestnet]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
   [Network.XLayer]: "0x023d904f2503c37127200ca07b976c3a53cc562623f67023115bf311f5805059",
