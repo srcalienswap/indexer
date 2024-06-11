@@ -176,8 +176,7 @@ const config: HardhatUserConfig = {
     },
     alienx: {
       url: "https://alienx.calderachain.xyz/infra-partner-http",
-      accounts: [process.env.PRIVATE_KEY as string],
-      gasPrice: 1000000000,
+      accounts: [process.env.PRIVATE_KEY as string]
     },
     mintMainnet: {
       url: "https://rpc.mintchain.io",

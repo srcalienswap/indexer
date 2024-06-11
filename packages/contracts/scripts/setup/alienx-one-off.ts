@@ -21,28 +21,28 @@ async function main() {
     console.log("Account balance:", (await deployer.getBalance()).toString());
 
     contractName = "ReservoirV6_0_1";
-    contractFactory = await ethers.getContractFactory(contractName);
-    args = [];
-    const ReservoirV6_0_1 = await contractFactory.deploy();
-    await ReservoirV6_0_1.deployed();
-    const reservoirAddress = ReservoirV6_0_1.address;
-
+    // contractFactory = await ethers.getContractFactory(contractName);
+    // args = [];
+    // const ReservoirV6_0_1 = await contractFactory.deploy();
+    // await ReservoirV6_0_1.deployed();
+    // const reservoirAddress = ReservoirV6_0_1.address;
+    const reservoirAddress = "0xCCc7e6b7308688Ec229dd504266a7f628AA0A9de";
     console.log(`${contractName} address:`, reservoirAddress);
     fs.writeFileSync("deployed-contracts.txt", `${contractName}: ${reservoirAddress}\n`);
-    await verify(reservoirAddress, args);
+    // await verify(reservoirAddress, args);
 
     const conduitControllerAddress = "0x00000000F9490004C11Cef243f5400493c00Ad63"; // alienx chain
 
     contractName = "ReservoirApprovalProxy";
-    contractFactory = await ethers.getContractFactory(contractName);
-    args = [conduitControllerAddress, reservoirAddress];
-    const reservoirApprovalProxy = await contractFactory.deploy(...args);
-    await reservoirApprovalProxy.deployed();
-    const reservoirApprovalProxyAddress = reservoirApprovalProxy.address;
-
+    // contractFactory = await ethers.getContractFactory(contractName);
+    // args = [conduitControllerAddress, reservoirAddress];
+    // const reservoirApprovalProxy = await contractFactory.deploy(...args);
+    // await reservoirApprovalProxy.deployed();
+    // const reservoirApprovalProxyAddress = reservoirApprovalProxy.address;
+    const reservoirApprovalProxyAddress = "0x243bABdD53eBca4835dB7716DA675c011d265c69";
     console.log(`${contractName} address:`, reservoirApprovalProxyAddress);
     fs.appendFileSync("deployed-contracts.txt", `${contractName}: ${reservoirApprovalProxyAddress}\n`);
-    await verify(reservoirApprovalProxyAddress, args);
+    // await verify(reservoirApprovalProxyAdds, args);res
 
     const alienswapAddress = "0x0568faA5d870089571192309d3033eB5FD89EB36"; // alienx chain
 
