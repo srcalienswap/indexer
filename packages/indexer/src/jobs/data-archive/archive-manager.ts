@@ -14,7 +14,7 @@ import { ArchiveInterface } from "@/jobs/data-archive/archive-classes/archive-in
 export class ArchiveManager {
   static async fileExists(bucket: string, key: string) {
     const s3 = new AWS.S3({
-      region: "us-east-1",
+      region: "ap-northeast-1",
     });
 
     try {
@@ -121,7 +121,7 @@ export class ArchiveManager {
       const gzFileContent = fs.readFileSync(filenameGzip);
 
       const s3 = new AWS.S3({
-        region: "us-east-1",
+        region: "ap-northeast-1",
       });
 
       try {
