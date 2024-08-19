@@ -707,7 +707,7 @@ export const getExecuteBidV5Options: RouteOptions = {
             }
 
             // TODO: Always require the unit price
-            const totalPrice = params.orderKind.startsWith("seaport")
+            const totalPrice = params.orderKind.startsWith("seaport") || params.orderKind.startsWith("alienswap")
               ? bn(params.weiPrice)
               : bn(params.weiPrice).mul(params.quantity ?? 1);
 
