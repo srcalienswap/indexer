@@ -52,7 +52,7 @@ export class ArchiveManager {
     }
 
     if (nextBatchTime) {
-      const s3Bucket = `${config.environment}-unuevenlabs-database-backup-${getNetworkName()}`;
+      const s3Bucket = `${config.environment}-unuevenlabs-database-backup-${getNetworkName()}-alienswap`;
 
       const startTimeMinute = Math.trunc(_.toNumber(format(new Date(nextBatchTime), "m")) / 10);
       const startTime = format(new Date(nextBatchTime), `yyyy-MM-dd HH:${startTimeMinute}0:00`);
