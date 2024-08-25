@@ -217,7 +217,7 @@ export const ReservoirCancellationZone: ChainIdToAddress = {
   [Network.LineaTestnet]: "0xfb2b693819e866ec87e574903f6e4943723c8ff7",
   [Network.Ancient8Testnet]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
   [Network.Zora]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
-  [Network.Scroll]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
+  // [Network.Scroll]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
   [Network.Apex]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
   [Network.AstarZkevm]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
   [Network.Blast]: "0x80a5f08f89e55ddeceedfe76612fb87fd8180f80",
