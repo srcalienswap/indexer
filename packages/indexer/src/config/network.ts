@@ -676,6 +676,11 @@ export const getNetworkSettings = (): NetworkSettings => {
         realtimeSyncFrequencySeconds: 5,
         lastBlockLatency: 5,
         headBlockDelay: 10,
+        mintsAsSalesBlacklist: [
+          ...defaultNetworkSettings.mintsAsSalesBlacklist,
+          // mint & goplus sbt
+          "0x40a43d27a5ccdea06a3b09fd65c0dc1c956ec8a4",
+        ],
         elasticsearch: {
           indexes: {
             activities: {
