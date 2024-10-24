@@ -174,6 +174,11 @@ const config: HardhatUserConfig = {
       chainId: networkConfig.chainId,
       url: "http://127.0.0.1:8545",
     },
+    apeChain: {
+      chainId: 33139,
+      url: "https://rpc.apechain.com/http",
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
     mintMainnet: {
       url: "https://rpc.mintchain.io",
       accounts: [process.env.PRIVATE_KEY as string],
@@ -272,9 +277,19 @@ const config: HardhatUserConfig = {
       xlayerTestnet: process.env.OKLINK_API_KEY ?? "",
       hal: "0x",
       "mint-sepolia":"0x",
-      mintMainnet: "0x"
+      mintMainnet: "0x",
+      apeChain: process.env.APESCAN_API_KEY ?? ""
     },
     customChains: [
+      // ape chain mainnet
+      {
+        network: "apeChain",
+        chainId: 33139,
+        urls: {
+          apiURL: "https://api.apescan.io/api",
+          browserURL: "https://apescan.io/",
+        },
+      },
       // mint chain mainnet
       {
         network: "mintMainnet",
