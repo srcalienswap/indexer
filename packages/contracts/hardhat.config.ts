@@ -204,6 +204,11 @@ const config: HardhatUserConfig = {
       url: "https://hal.rpc.caldera.xyz/http",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
+    duckChain: {
+      chainId: 5545,
+      url: "https://rpc.duckchain.io",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
     // Mainnets
     mainnet: getNetworkConfig(1),
     optimism: getNetworkConfig(10),
@@ -278,9 +283,21 @@ const config: HardhatUserConfig = {
       hal: "0x",
       "mint-sepolia":"0x",
       mintMainnet: "0x",
-      apeChain: process.env.APESCAN_API_KEY ?? ""
+      apeChain: process.env.APESCAN_API_KEY ?? "",
+      duckChain: "0x"
     },
     customChains: [
+      // duckchain
+      {
+        network: "duckChain",
+        chainId: 5545,
+        urls: {
+          apiURL: "https://scan.duckchain.io/api",
+          browserURL: "https://scan.duckchain.io/"
+          // apiURL: "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/DUCKCHAIN",
+          // browserURL: "https://www.oklink.com",
+        },
+      },
       // ape chain mainnet
       {
         network: "apeChain",

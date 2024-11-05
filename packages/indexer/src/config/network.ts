@@ -15,6 +15,9 @@ export const getNetworkName = () => {
     case 1:
       return "mainnet";
 
+    case 5545:
+      return "duckchain";
+
     case 33139:
       return "apechain";
 
@@ -750,6 +753,47 @@ export const getNetworkSettings = (): NetworkSettings => {
                   'ETH',
                   18,
                   '{"coingeckoCurrencyId": "apecoin", "image": "https://assets.coingecko.com/coins/images/50913/large/apecoin.jpg"}'
+                ) ON CONFLICT DO NOTHING
+              `
+            ),
+          ]);
+        },
+      };
+    }
+    //ape-mainnet
+    case 5545: {
+      return {
+        ...defaultNetworkSettings,
+        enableWebSocket: true,
+        realtimeSyncMaxBlockLag: 32,
+        realtimeSyncFrequencySeconds: 2,
+        lastBlockLatency: 5,
+        headBlockDelay: 5,
+        elasticsearch: {
+          indexes: {
+            activities: {
+              ...defaultNetworkSettings.elasticsearch?.indexes?.activities,
+              numberOfShards: 10,
+            },
+          },
+        },
+        onStartup: async () => {
+          // Insert the native currency
+          await Promise.all([
+            idb.none(
+              `
+                INSERT INTO currencies (
+                  contract,
+                  name,
+                  symbol,
+                  decimals,
+                  metadata
+                ) VALUES (
+                  '\\x0000000000000000000000000000000000000000',
+                  'Ton',
+                  'TON',
+                  18,
+                  '{"coingeckoCurrencyId": "the-open-network", "image": "https://assets.coingecko.com/coins/images/17980/large/photo_2024-09-10_17.09.00.jpeg"}'
                 ) ON CONFLICT DO NOTHING
               `
             ),
